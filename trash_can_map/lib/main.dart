@@ -42,6 +42,18 @@ class _MainPage extends State<MainPage> with SingleTickerProviderStateMixin {
   initState() {
     super.initState();
     tabController = TabController(length: 2, vsync: this);
+    tabController.addListener(() {
+      int pageNum = tabController.index;
+      setState(() {
+        if (pageNum == 0) {
+          mapIconColor = Colors.black87;
+          comuIconColor = Colors.black26;
+        } else {
+          mapIconColor = Colors.black26;
+          comuIconColor = Colors.black87;
+        }
+      });
+    });
   }
 
   @override
@@ -73,17 +85,6 @@ class _MainPage extends State<MainPage> with SingleTickerProviderStateMixin {
               )
             ],
             indicatorColor: Color(0xffC9D3F0),
-            onTap: (int page) {
-              setState(() {
-                if (page == 0) {
-                  mapIconColor = Colors.black87;
-                  comuIconColor = Colors.black26;
-                } else {
-                  mapIconColor = Colors.black26;
-                  comuIconColor = Colors.black87;
-                }
-              });
-            },
           ),
         ));
   }
