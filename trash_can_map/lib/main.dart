@@ -34,6 +34,7 @@ class MainPage extends StatefulWidget {
 class _MainPage extends State<MainPage> with SingleTickerProviderStateMixin {
   // 탭 컨트롤러
   late TabController tabController;
+
   // 탭바 아이콘 색상
   Color mapIconColor = Colors.black87;
   Color comuIconColor = Colors.black26;
@@ -71,7 +72,14 @@ class _MainPage extends State<MainPage> with SingleTickerProviderStateMixin {
           controller: tabController,
         ),
         bottomNavigationBar: Container(
-          color: const Color(0xffC9D3F0),
+          // 네비게이터 꾸미기
+          decoration: BoxDecoration(
+              border: Border(
+            top: BorderSide(
+              color: Colors.black,
+              width: 0.1,
+            ),
+          )),
           child: TabBar(
             controller: tabController,
             tabs: [
@@ -84,7 +92,10 @@ class _MainPage extends State<MainPage> with SingleTickerProviderStateMixin {
                 icon: Icon(Icons.forum, color: comuIconColor),
               )
             ],
-            indicatorColor: Color(0xffC9D3F0),
+            // indicatorColor: Color(0xffC9D3F0),
+            indicatorColor: Colors.black,
+
+            isScrollable: false,
           ),
         ));
   }
