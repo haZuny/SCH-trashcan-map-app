@@ -10,6 +10,8 @@ import 'package:flutter/gestures.dart'; // 지도 제스처
 import 'package:flutter/foundation.dart'; // 지도 제스처
 import 'TrascModel.dart'; // 휴지통 모델
 import 'changePercentToFixel.dart'; // 화면 픽셀 계산
+import 'package:flutter/services.dart'; // 진동
+import 'mapPageDialog.dart'; // 다이얼로그 분리
 
 class MapPage extends StatefulWidget {
   @override
@@ -17,48 +19,45 @@ class MapPage extends StatefulWidget {
 }
 
 class _MapPage extends State<MapPage> {
-  // 위치 클래스
-  Location location = new Location();
+  Location location = new Location(); // 위치 클래스
 
-  // 사용자 현재 위치
-  late LocationData currendLoc;
+  late LocationData currendLoc; // 사용자 현재 위치
 
-  // 지도 컨트롤러
-  Completer<GoogleMapController> _mapController = Completer();
+  Completer<GoogleMapController> _mapController = Completer(); // 지도 컨트롤러
 
-  // 지도 첫 위치
   final CameraPosition _initialPosition =
-      CameraPosition(target: LatLng(126.734086, 127.269311));
+      CameraPosition(target: LatLng(126.734086, 127.269311)); // 지도 첫 위치
 
-  // 메인탭 지도 검색 텍스트필드 컨트롤러
-  TextEditingController searchingMapTextController = TextEditingController();
+  TextEditingController searchingMapTextController =
+      TextEditingController(); // 메인탭 지도 검색 텍스트필드 컨트롤러
 
-  // 플로팅 버튼 색상
-  Color moveCurBtnColor = Colors.black26;
-  Color addTraBtnColor = Colors.black26;
+  Color moveCurBtnColor = Colors.black26; // 플로팅 버튼 색상
+  Color addTraBtnColor = Colors.black26; // 플로팅 버튼 색상
 
-  // 쓰레기통 리스트
-  Set<TrashModel> trashList = Set();
+  Set<TrashModel> trashList = Set(); // 쓰레기통 리스트
 
-  // 마커 리스트
-  List<Marker> markerList = [];
+  List<Marker> markerList = []; // 마커 리스트
+
+  bool canAttTrash = true; // 휴지통 추가 가능 플래그
+
+  MapPageDialog myDialog = MapPageDialog(); // 다이얼로그 분리
 
   // 상태 초기화
   @override
   initState() {
-    // TODO: implement initState
     super.initState();
+    // 쓰레기통 리스트 추가
+    trashList.add(TrashModel('1', 37.390044125547675, 126.81151201344588,
+        DateTime.now(), "놀이터 시소 옆"));
     trashList.add(TrashModel(
-        '1', 37.390044125547675, 126.81151201344588, DateTime.now(), "놀이터 시소 옆"));
-    trashList.add(
-        TrashModel('2', 37.39019780692878, 126.81173240672312, DateTime.now(), "나무 의자 앞"));
+        '2', 37.39019780692878, 126.81173240672312, DateTime.now(), "나무 의자 앞"));
     trashList.add(TrashModel(
         '3', 37.389893506516614, 126.81160330525684, DateTime.now(), "화장실 문쪽"));
-    trashList.add(
-        TrashModel('4', 37.38976810517254, 126.81206942919309, DateTime.now(), "아파트 분리수거장(매주 수)"));
-    trashList.add(TrashModel(
-        '1', 37.389764733403986, 126.81136648780914, DateTime.now(), "도서관 입구 안쪽"));
-
+    trashList.add(TrashModel('4', 37.38976810517254, 126.81206942919309,
+        DateTime.now(), "아파트 분리수거장(매주 수)"));
+    trashList.add(TrashModel('1', 37.389764733403986, 126.81136648780914,
+        DateTime.now(), "도서관 입구 안쪽"));
+    // 마커 추가
     for (TrashModel trash in trashList) {
       markerList.add(Marker(
           markerId: MarkerId(trash.id),
@@ -71,25 +70,7 @@ class _MapPage extends State<MapPage> {
             showDialog(
                 context: context,
                 builder: (BuildContext context) {
-                  return AlertDialog(
-                      title: Text(trash.posDescription),
-                      content: Container(
-                        child: Column(
-                          children: [
-                            Divider(
-                              color: Colors.black,
-                              thickness: 1,
-                            ),
-                            Flexible(
-                                fit: FlexFit.tight,
-                                child: Image.asset(
-                                  'lib/sub/imgNotLoad.png',
-                                ))
-                          ],
-                        ),
-                        width: changePercentSizeToPixel(context, 70, true),
-                        height: changePercentSizeToPixel(context, 40, false),
-                      ));
+                  return myDialog.getClickMarkerDialog(context, trash);
                 });
           }));
     }
@@ -198,16 +179,57 @@ class _MapPage extends State<MapPage> {
                     ),
                     margin: EdgeInsets.only(left: 10, top: 10),
                   ),
-                  onTap: () {
-                    // 깜빡임 구현
-                    setState(() {
-                      addTraBtnColor = Colors.black87;
-                    });
-                    Future.delayed(Duration(milliseconds: 50), () {
+                  onTap: () async {
+                    if (canAttTrash) {
+                      canAttTrash = false;
+                      // 깜빡임 구현
                       setState(() {
-                        addTraBtnColor = Colors.black26;
+                        addTraBtnColor = Colors.black87;
                       });
-                    });
+                      Future.delayed(Duration(milliseconds: 50), () {
+                        setState(() {
+                          addTraBtnColor = Colors.black26;
+                        });
+                      });
+
+                      // 현재 위치로 이동
+                      currendLoc = currendLoc = await location.getLocation();
+
+                      // 추가 마커 생성
+                      setState(() {
+                        _moveLocation(currendLoc);
+                        markerList.add(Marker(
+                            markerId: MarkerId("-1"),
+                            position: LatLng(
+                                currendLoc.latitude!, currendLoc.longitude!),
+                            draggable: true,
+
+                            // 추가 마커 한번 터치
+                            onTap: () {
+                              setState(() {
+                                markerList.removeLast();
+                                canAttTrash = true;
+                              });
+                            },
+
+                            // 추가마커 드래그 시작
+                            onDragStart: (LatLag) => HapticFeedback.vibrate(),
+                            onDragEnd: (LatLng) {
+                              // 마커제거
+                              setState(() {
+                                markerList.removeLast();
+                                canAttTrash = true;
+                              });
+                            }));
+                      });
+
+                      // 휴지통 추가 다이얼로그
+                      showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return myDialog.getAddTrashDialog(context);
+                          });
+                    }
                   },
                 ),
               ],
@@ -215,7 +237,6 @@ class _MapPage extends State<MapPage> {
           )
         ]));
   }
-
 
   // 지정 위치로 이동
   void _moveLocation(LocationData loc) async {
