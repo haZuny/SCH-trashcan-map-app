@@ -1,14 +1,15 @@
 //main.dart
 
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart'; // 구글맵 api
 import 'package:location/location.dart'; // 현재 좌표 구하기
 import 'package:flutter/gestures.dart'; // 지도 제스처
 import 'package:flutter/foundation.dart'; // 지도 제스처
-import 'TrascModel.dart';
-
+import 'TrascModel.dart'; // 휴지통 모델
+import 'changePercentToFixel.dart'; // 화면 픽셀 계산
 
 class MapPage extends StatefulWidget {
   @override
@@ -41,41 +42,56 @@ class _MapPage extends State<MapPage> {
 
   // 마커 리스트
   List<Marker> markerList = [];
-  
+
   // 상태 초기화
   @override
   initState() {
     // TODO: implement initState
     super.initState();
     trashList.add(TrashModel(
-        '1', 37.390044125547675, 126.81151201344588, DateTime.now()));
+        '1', 37.390044125547675, 126.81151201344588, DateTime.now(), "놀이터 시소 옆"));
     trashList.add(
-        TrashModel('2', 37.39019780692878, 126.81173240672312, DateTime.now()));
+        TrashModel('2', 37.39019780692878, 126.81173240672312, DateTime.now(), "나무 의자 앞"));
     trashList.add(TrashModel(
-        '3', 37.389893506516614, 126.81160330525684, DateTime.now()));
+        '3', 37.389893506516614, 126.81160330525684, DateTime.now(), "화장실 문쪽"));
     trashList.add(
-        TrashModel('4', 37.38976810517254, 126.81206942919309, DateTime.now()));
+        TrashModel('4', 37.38976810517254, 126.81206942919309, DateTime.now(), "아파트 분리수거장(매주 수)"));
     trashList.add(TrashModel(
-        '1', 37.389764733403986, 126.81136648780914, DateTime.now()));
+        '1', 37.389764733403986, 126.81136648780914, DateTime.now(), "도서관 입구 안쪽"));
 
     for (TrashModel trash in trashList) {
       markerList.add(Marker(
           markerId: MarkerId(trash.id),
           position: LatLng(trash.latitude, trash.longitude),
-          icon: BitmapDescriptor.defaultMarkerWithHue(
-              BitmapDescriptor.hueAzure),
-        onTap: (){
-          showDialog(context: context, builder: (BuildContext context){return AlertDialog(
-            title: Text("주소주소"),
-            content: SizedBox(child: Column(
-              children: [
-                Divider(color: Colors.black, thickness: 1,),
-                Image.asset('lib/sub/imgNotLoad.png', width: 10000, height: 10000,)
-              ],
-            ),)
-          );});
-        }
-      ));
+          icon:
+              BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
+          // 마커 클릭
+          onTap: () async {
+            // 다이얼로그 호출
+            showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                      title: Text(trash.posDescription),
+                      content: Container(
+                        child: Column(
+                          children: [
+                            Divider(
+                              color: Colors.black,
+                              thickness: 1,
+                            ),
+                            Flexible(
+                                fit: FlexFit.tight,
+                                child: Image.asset(
+                                  'lib/sub/imgNotLoad.png',
+                                ))
+                          ],
+                        ),
+                        width: changePercentSizeToPixel(context, 70, true),
+                        height: changePercentSizeToPixel(context, 40, false),
+                      ));
+                });
+          }));
     }
   }
 
@@ -200,13 +216,15 @@ class _MapPage extends State<MapPage> {
         ]));
   }
 
+
+  // 지정 위치로 이동
   void _moveLocation(LocationData loc) async {
     final GoogleMapController controller = await _mapController.future;
     controller.animateCamera(CameraUpdate.newCameraPosition(
       CameraPosition(
         bearing: 0,
         target: LatLng(loc.latitude!, loc.longitude!),
-        zoom: 20,
+        zoom: 18,
       ),
     ));
   }
