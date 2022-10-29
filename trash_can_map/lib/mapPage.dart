@@ -13,6 +13,8 @@ import 'changePercentToFixel.dart'; // 화면 픽셀 계산
 import 'package:flutter/services.dart'; // 진동
 import 'mapPageDialog.dart'; // 다이얼로그 분리
 import 'dart:math';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io'; // 파일
 
 class MapPage extends StatefulWidget {
   @override
@@ -42,6 +44,10 @@ class _MapPage extends State<MapPage> {
   bool canAttTrash = true; // 휴지통 추가 가능 플래그
 
   MapPageDialog myDialog = MapPageDialog(); // 다이얼로그 분리
+
+  TrashModel? addedTrash; // 추가되는 휴지통 정보 저장
+
+  ImagePicker imagePicker = ImagePicker();
 
   // 상태 초기화
   @override
@@ -79,7 +85,7 @@ class _MapPage extends State<MapPage> {
 
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
+    return Scaffold(
         appBar: AppBar(
           title: Row(children: [
             // 검색 택스트 필드
@@ -195,24 +201,34 @@ class _MapPage extends State<MapPage> {
                     currendLoc = await location.getLocation();
                     late Marker marker;
                     double minDistance = 9999999;
-                    for(Marker trash in markerList){
-                      double distance = sqrt(pow(currendLoc.latitude! - trash.position.latitude, 2) + pow(currendLoc.longitude! - trash.position.longitude, 2));
-                      if(distance < minDistance){
+                    for (Marker trash in markerList) {
+                      double distance = sqrt(pow(
+                              currendLoc.latitude! - trash.position.latitude,
+                              2) +
+                          pow(currendLoc.longitude! - trash.position.longitude,
+                              2));
+                      if (distance < minDistance) {
                         minDistance = distance;
                         marker = trash;
                       }
                     }
                     // 이동
-                      final GoogleMapController controller = await _mapController.future;
-                      controller.animateCamera(CameraUpdate.newCameraPosition(
-                        CameraPosition(
-                          bearing: 0,
-                          target: LatLng(marker.position.latitude!, marker.position.longitude!),
-                          zoom: 18,
-                        ),
-                      ));
+                    final GoogleMapController controller =
+                        await _mapController.future;
+                    controller.animateCamera(CameraUpdate.newCameraPosition(
+                      CameraPosition(
+                        bearing: 0,
+                        target: LatLng(marker.position.latitude!,
+                            marker.position.longitude!),
+                        zoom: 18,
+                      ),
+                    ));
                     // 팝업 띄욱;
-                    showDialog(context: context, builder: (BuildContext context)=>myDialog.getClickMarkerDialog(context, trashList[markerList.indexOf(marker)]));
+                    showDialog(
+                        context: context,
+                        builder: (BuildContext context) =>
+                            myDialog.getClickMarkerDialog(context,
+                                trashList[markerList.indexOf(marker)]));
                   },
                 ),
 
@@ -239,12 +255,12 @@ class _MapPage extends State<MapPage> {
                         });
                       });
 
-                      // 현재 위치로 이동
-                      currendLoc = await location.getLocation();
-
                       // 추가 마커 생성
-                      setState(() {
+                      setState(() async {
+                        // 현재 위치로 이동
+                        currendLoc = await location.getLocation();
                         _moveLocation(currendLoc);
+                        // 마커 리스트에 추가
                         markerList.add(Marker(
                             markerId: MarkerId("-1"),
                             position: LatLng(
@@ -264,16 +280,22 @@ class _MapPage extends State<MapPage> {
                             onDragStart: (LatLag) => HapticFeedback.vibrate(),
 
                             // 추가마커 드래그 끝
-                            onDragEnd: (LatLng) {
+                            onDragEnd: (LatLng pos) {
                               // 마커제거
-                              setState(() {
-                                markerList.removeLast();
-                                canAttTrash = true;
+                              markerList.removeLast();
+                              canAttTrash = true;
+
+                              // 다이얼로그 생성
+                              showDialog(
+                                  context: context, builder: (context) {
+                                return myDialog.getInputAddTrashDialog(
+                                    context, pos);
                               });
+
                             }));
                       });
 
-                      // 휴지통 추가 다이얼로그
+                      // 휴지통 추가 안내 다이얼로그
                       showDialog(
                           context: context,
                           builder: (BuildContext context) {
@@ -300,9 +322,8 @@ class _MapPage extends State<MapPage> {
     ));
   }
 
-
   // 플로팅 버튼 깜빡임 구현 함수
-  void btnSparkle(Color btnColor){
+  void btnSparkle(Color btnColor) {
     setState(() {
       btnColor = Colors.black87;
     });
@@ -313,5 +334,3 @@ class _MapPage extends State<MapPage> {
     });
   }
 }
-
-
