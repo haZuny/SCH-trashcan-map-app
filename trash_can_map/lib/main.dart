@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'mapPage.dart';
 import 'comu_index.dart';
+import 'changePercentToFixel.dart';
 
 void main() {
   runApp(const MyApp());
@@ -85,11 +86,16 @@ class _MainPage extends State<MainPage> with SingleTickerProviderStateMixin {
             tabs: [
               Tab(
                   icon: Icon(
-                Icons.map,
+                Icons.pin_drop,
                 color: mapIconColor,
+                size: changePercentSizeToPixel(context, 2.2, true),
               )),
               Tab(
-                icon: Icon(Icons.forum, color: comuIconColor),
+                icon: Icon(
+                  Icons.forum,
+                  color: comuIconColor,
+                  size: changePercentSizeToPixel(context, 2.2, true),
+                ),
               )
             ],
             // indicatorColor: Color(0xffC9D3F0),
