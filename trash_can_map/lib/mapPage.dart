@@ -9,6 +9,7 @@ import 'package:flutter/gestures.dart'; // 지도 제스처
 import 'package:flutter/foundation.dart'; // 지도 제스처
 import 'TrascModel.dart';
 
+
 class MapPage extends StatefulWidget {
   @override
   State<MapPage> createState() => _MapPage();
@@ -40,9 +41,10 @@ class _MapPage extends State<MapPage> {
 
   // 마커 리스트
   List<Marker> markerList = [];
-
+  
+  // 상태 초기화
   @override
-  void initState() {
+  initState() {
     // TODO: implement initState
     super.initState();
     trashList.add(TrashModel(
@@ -63,7 +65,15 @@ class _MapPage extends State<MapPage> {
           icon: BitmapDescriptor.defaultMarkerWithHue(
               BitmapDescriptor.hueAzure),
         onTap: (){
-
+          showDialog(context: context, builder: (BuildContext context){return AlertDialog(
+            title: Text("주소주소"),
+            content: SizedBox(child: Column(
+              children: [
+                Divider(color: Colors.black, thickness: 1,),
+                Image.asset('lib/sub/imgNotLoad.png', width: 10000, height: 10000,)
+              ],
+            ),)
+          );});
         }
       ));
     }
