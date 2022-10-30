@@ -14,6 +14,10 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io'; // 파일
 import 'mapPage.dart';
 
+
+
+Color bckColor = Colors.white;
+
 // 마커 클릭 다이얼로그
 class MakerClickDialog extends StatelessWidget {
   late TrashModel trash;
@@ -65,7 +69,7 @@ class MakerClickDialog extends StatelessWidget {
           },
         ),
       ],
-      backgroundColor: Colors.white54,
+      backgroundColor: bckColor,
     );
   }
 }
@@ -97,7 +101,7 @@ class AddTrashDialog extends StatelessWidget {
           },
         ),
       ],
-      backgroundColor: Colors.white54,
+      backgroundColor: bckColor,
       scrollable: true,
     );
   }
@@ -128,6 +132,7 @@ class _GetInputAddTrashDialog extends State<GetInputAddTrashDialog> {
   late LatLng pos;
   late List<TrashModel> trashList;
   late List<Marker> markerList;
+  bool isImagePick = false;
 
   _GetInputAddTrashDialog(
       LatLng pos, List<TrashModel> trashList, List<Marker> markerList) {
@@ -153,9 +158,15 @@ class _GetInputAddTrashDialog extends State<GetInputAddTrashDialog> {
             Row(
               children: [
                 Flexible(
-                    child: TextField(
-                  controller: textController,
-                ))
+                    child: Container(child: TextField(
+            controller: textController,
+            decoration: const InputDecoration(
+              hintText: '위치를 자세히 설명해주세요.',
+              labelText: '위치 설명',
+
+            )),
+                      margin: EdgeInsets.only(bottom: 20),
+      ))
               ],
             ),
             // 이미지
@@ -173,6 +184,7 @@ class _GetInputAddTrashDialog extends State<GetInputAddTrashDialog> {
             Image img = Image.file(File(f!.path));
             setState(() {
               image = img;
+              isImagePick = true;
             });
           },
         ),
@@ -180,7 +192,14 @@ class _GetInputAddTrashDialog extends State<GetInputAddTrashDialog> {
         TextButton(
           child: new Text("확인"),
           onPressed: () {
-            // 모델 정보 찾음
+            Navigator.pop(context);
+            // 입력 잘 했나 확인
+            if (!isImagePick)
+              return;
+            if (textController.text == "")
+              return;
+
+            // 모델 생성
             TrashModel model = TrashModel(
                 (trashList.length + 1).toString(),
                 pos.latitude,
@@ -188,16 +207,14 @@ class _GetInputAddTrashDialog extends State<GetInputAddTrashDialog> {
                 DateTime.now(),
                 textController.text,
                 image: image);
+
             // 리스트에 추가
-            trashList.add(model);
-            Navigator.pop(context);
-            // // markerList.add(getDefauldMarker(model, context));
-            // markerList.add(getDefauldMarker(model, context));
+              trashList.add(model);
           },
         ),
       ],
       actionsAlignment: MainAxisAlignment.spaceAround,
-      backgroundColor: Colors.white54,
+      backgroundColor: bckColor,
     );
   }
 }

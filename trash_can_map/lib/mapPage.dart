@@ -35,6 +35,7 @@ class _MapPage extends State<MapPage> {
       TextEditingController(); // 메인탭 지도 검색 텍스트필드 컨트롤러
 
   Color moveCurBtnColor = Colors.black26; // 플로팅 버튼 색상
+  Color goNestBtnColor = Colors.black26; // 플로팅 버튼 색상
   Color addTraBtnColor = Colors.black26; // 플로팅 버튼 색상
 
   List<TrashModel> trashList = []; // 쓰레기통 리스트
@@ -171,18 +172,18 @@ class _MapPage extends State<MapPage> {
                     child: Icon(
                       Icons.near_me,
                       size: 40,
-                      color: moveCurBtnColor,
+                      color: goNestBtnColor,
                     ),
                     margin: EdgeInsets.only(left: 10, top: 10),
                   ),
                   onTap: () async {
                     // 깜빡임 구현
                     setState(() {
-                      moveCurBtnColor = Colors.black87;
+                      goNestBtnColor = Colors.black87;
                     });
                     Future.delayed(Duration(milliseconds: 50), () {
                       setState(() {
-                        moveCurBtnColor = Colors.black26;
+                        goNestBtnColor = Colors.black26;
                       });
                     });
 
@@ -294,6 +295,11 @@ class _MapPage extends State<MapPage> {
                                       setState(() {
                                       markerList.add(getDefauldMarker(trash, context));
 
+                                      });
+                                    }
+                                    else{
+                                      showDialog(context: context, builder: (context){
+                                        return AlertDialog(title: Text("오류"), content: Text("정보를 제대로 입력해주세요."),backgroundColor: Colors.white70,);
                                       });
                                     }
                               });
