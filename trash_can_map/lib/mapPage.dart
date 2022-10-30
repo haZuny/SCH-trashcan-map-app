@@ -43,11 +43,13 @@ class _MapPage extends State<MapPage> {
 
   bool canAttTrash = true; // 휴지통 추가 가능 플래그
 
-  MapPageDialog myDialog = MapPageDialog(); // 다이얼로그 분리
-
   TrashModel? addedTrash; // 추가되는 휴지통 정보 저장
 
   ImagePicker imagePicker = ImagePicker();
+
+  TextEditingController textController = TextEditingController();
+  Image image = Image.asset('lib/sub/imgNotLoad.png');
+  ImagePicker imgPicker = ImagePicker();
 
   // 상태 초기화
   @override
@@ -66,25 +68,12 @@ class _MapPage extends State<MapPage> {
         DateTime.now(), "도서관 입구 안쪽"));
     // 마커 추가
     for (TrashModel trash in trashList) {
-      markerList.add(Marker(
-          markerId: MarkerId(trash.id),
-          position: LatLng(trash.latitude, trash.longitude),
-          icon:
-              BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
-          // 마커 클릭
-          onTap: () async {
-            // 다이얼로그 호출
-            showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return myDialog.getClickMarkerDialog(context, trash);
-                });
-          }));
+      markerList.add(getDefauldMarker(trash, context));
     }
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context2) {
     return Scaffold(
         appBar: AppBar(
           title: Row(children: [
@@ -201,15 +190,17 @@ class _MapPage extends State<MapPage> {
                     currendLoc = await location.getLocation();
                     late Marker marker;
                     double minDistance = 9999999;
-                    for (Marker trash in markerList) {
+                    int minIdx = 0;
+                    for (int i = 0; i < markerList.length; i++) {
                       double distance = sqrt(pow(
-                              currendLoc.latitude! - trash.position.latitude,
+                              currendLoc.latitude! - markerList[i].position.latitude,
                               2) +
-                          pow(currendLoc.longitude! - trash.position.longitude,
+                          pow(currendLoc.longitude! - markerList[i].position.longitude,
                               2));
                       if (distance < minDistance) {
                         minDistance = distance;
-                        marker = trash;
+                        marker = markerList[i];
+                        minIdx = i;
                       }
                     }
                     // 이동
@@ -223,12 +214,11 @@ class _MapPage extends State<MapPage> {
                         zoom: 18,
                       ),
                     ));
-                    // 팝업 띄욱;
+                    // 팝업 띄우기
                     showDialog(
                         context: context,
                         builder: (BuildContext context) =>
-                            myDialog.getClickMarkerDialog(context,
-                                trashList[markerList.indexOf(marker)]));
+                            MakerClickDialog(trashList[minIdx]));
                   },
                 ),
 
@@ -255,8 +245,13 @@ class _MapPage extends State<MapPage> {
                         });
                       });
 
-                      // 추가 마커 생성
-                      setState(() async {
+                      // 휴지통 추가 안내 다이얼로그
+                      showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AddTrashDialog();
+                          });
+
                         // 현재 위치로 이동
                         currendLoc = await location.getLocation();
                         _moveLocation(currendLoc);
@@ -271,7 +266,9 @@ class _MapPage extends State<MapPage> {
                             onTap: () {
                               HapticFeedback.vibrate();
                               setState(() {
-                                markerList.removeLast();
+                                setState(() {
+                                  markerList.removeLast();
+                                });
                                 canAttTrash = true;
                               });
                             },
@@ -281,26 +278,26 @@ class _MapPage extends State<MapPage> {
 
                             // 추가마커 드래그 끝
                             onDragEnd: (LatLng pos) {
-                              // 마커제거
-                              markerList.removeLast();
+                              setState(() {
+                                markerList.removeLast();
+                              });
                               canAttTrash = true;
 
                               // 다이얼로그 생성
                               showDialog(
-                                  context: context, builder: (context) {
-                                return myDialog.getInputAddTrashDialog(
-                                    context, pos);
+                                  context: context,
+                                  builder: (context) {
+                                    return GetInputAddTrashDialog(pos, trashList, markerList);
+                                  }).then((value) {
+                                    if(trashList.length > markerList.length){
+                                      TrashModel trash = trashList.last;
+                                      setState(() {
+                                      markerList.add(getDefauldMarker(trash, context));
+
+                                      });
+                                    }
                               });
-
                             }));
-                      });
-
-                      // 휴지통 추가 안내 다이얼로그
-                      showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return myDialog.getAddTrashDialog(context);
-                          });
                     }
                   },
                 ),
@@ -321,16 +318,22 @@ class _MapPage extends State<MapPage> {
       ),
     ));
   }
+}
 
-  // 플로팅 버튼 깜빡임 구현 함수
-  void btnSparkle(Color btnColor) {
-    setState(() {
-      btnColor = Colors.black87;
-    });
-    Future.delayed(Duration(milliseconds: 50), () {
-      setState(() {
-        btnColor = Colors.black26;
+
+Marker getDefauldMarker(TrashModel trash, BuildContext context){
+  return Marker(
+      markerId: MarkerId(trash.id),
+      position: LatLng(trash.latitude, trash.longitude),
+      icon: BitmapDescriptor.defaultMarkerWithHue(
+          BitmapDescriptor.hueAzure),
+      // 마커 클릭
+      onTap: () async {
+        // 다이얼로그 호출
+        showDialog(
+            context: Scaffold.of(context).context,
+            builder: (context) {
+              return MakerClickDialog(trash);
+            });
       });
-    });
-  }
 }

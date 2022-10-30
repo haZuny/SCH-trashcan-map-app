@@ -12,11 +12,19 @@ import 'package:flutter/services.dart'; // 진동
 
 import 'package:image_picker/image_picker.dart';
 import 'dart:io'; // 파일
+import 'mapPage.dart';
 
-class MapPageDialog {
-  // 마커 클릭 다이알로그
-  AlertDialog getClickMarkerDialog(BuildContext context, TrashModel trash) {
-    AlertDialog returnDialog = AlertDialog(
+// 마커 클릭 다이얼로그
+class MakerClickDialog extends StatelessWidget {
+  late TrashModel trash;
+
+  MakerClickDialog(TrashModel trash) {
+    this.trash = trash;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
       title: Text(
         "휴지통",
@@ -33,15 +41,17 @@ class MapPageDialog {
                 ),
                 Flexible(
                     child: Text(
-                      trash.posDescription,
-                    )),
+                  trash.posDescription,
+                )),
               ],
             ),
             Flexible(
                 fit: FlexFit.tight,
-                child: Image.asset(
-                  'lib/sub/imgNotLoad.png',
-                ))
+                child: trash.image == null
+                    ? Image.asset(
+                        'lib/sub/imgNotLoad.png',
+                      )
+                    : trash.image!)
           ],
         ),
         width: changePercentSizeToPixel(context, 70, true),
@@ -57,13 +67,14 @@ class MapPageDialog {
       ],
       backgroundColor: Colors.white54,
     );
-
-    return returnDialog;
   }
+}
 
-  // 휴지통 추가 다이얼로그
-  AlertDialog getAddTrashDialog(BuildContext context) {
-    AlertDialog returnDialog = AlertDialog(
+// 휴지통 추가 안내 다이얼로그
+class AddTrashDialog extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
       title: Text(
         "휴지통 추가",
@@ -72,8 +83,8 @@ class MapPageDialog {
       content: SizedBox(
         child: Flexible(
             child: Text(
-              "빨간색 마크를 꾹 눌러 위치를 설정해 주세요. 취소하시려면 마크를 한번 터치해주세요.",
-            )),
+          "빨간색 마크를 꾹 눌러 위치를 설정해 주세요. 취소하시려면 마크를 한번 터치해주세요.",
+        )),
         width: changePercentSizeToPixel(context, 30, true),
         // height: changePercentSizeToPixel(
         //     context, 10, false),
@@ -89,16 +100,45 @@ class MapPageDialog {
       backgroundColor: Colors.white54,
       scrollable: true,
     );
-    return returnDialog;
+  }
+}
+
+// 휴지통 추가 정보 입력 다이얼로그
+class GetInputAddTrashDialog extends StatefulWidget {
+  late LatLng pos;
+  late List<TrashModel> trashList;
+  late List<Marker> markerList;
+
+  GetInputAddTrashDialog(
+      LatLng pos, List<TrashModel> trashList, List<Marker> markerList) {
+    this.pos = pos;
+    this.trashList = trashList;
+    this.markerList = markerList;
   }
 
-  // 휴지통 추가 정보 입력 다이얼로그
-  TextEditingController textController = TextEditingController();
-  File? image;
-  ImagePicker imgPicker = ImagePicker();
+  @override
+  State<GetInputAddTrashDialog> createState() =>
+      _GetInputAddTrashDialog(pos, trashList, markerList);
+}
 
-  AlertDialog getInputAddTrashDialog(BuildContext context, LatLng pos,) {
-    AlertDialog returnDialog = AlertDialog(
+class _GetInputAddTrashDialog extends State<GetInputAddTrashDialog> {
+  TextEditingController textController = TextEditingController();
+  Image image = Image.asset('lib/sub/imgNotLoad.png');
+  ImagePicker imgPicker = ImagePicker();
+  late LatLng pos;
+  late List<TrashModel> trashList;
+  late List<Marker> markerList;
+
+  _GetInputAddTrashDialog(
+      LatLng pos, List<TrashModel> trashList, List<Marker> markerList) {
+    this.pos = pos;
+    this.trashList = trashList;
+    this.markerList = markerList;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
       title: Text(
         "휴지통 추가",
@@ -119,11 +159,7 @@ class MapPageDialog {
               ],
             ),
             // 이미지
-            Flexible(
-                fit: FlexFit.tight,
-                child: image == null
-                    ? Center(child: Text("사진을 찍거나, 선택해주세요."))
-                    : Image.file(image!))
+            Flexible(fit: FlexFit.tight, child: image)
           ],
         ),
       ),
@@ -133,33 +169,35 @@ class MapPageDialog {
         TextButton(
           child: new Text("사진 찍기"),
           onPressed: () async {
-            // Image get
-            final image2 =
-                await imgPicker.pickImage(source: ImageSource.camera);
-            image = File(image2!.path);
-
+            final f = await imgPicker.getImage(source: ImageSource.camera);
+            Image img = Image.file(File(f!.path));
+            setState(() {
+              image = img;
+            });
           },
         ),
-
-        // 사진 선택 버튼
-        TextButton(
-          child: new Text("사진 선택"),
-          onPressed: () async {},
-        ),
-
         // 확인버튼
         TextButton(
           child: new Text("확인"),
           onPressed: () {
-            image = null;
+            // 모델 정보 찾음
+            TrashModel model = TrashModel(
+                (trashList.length + 1).toString(),
+                pos.latitude,
+                pos.longitude,
+                DateTime.now(),
+                textController.text,
+                image: image);
+            // 리스트에 추가
+            trashList.add(model);
             Navigator.pop(context);
+            // // markerList.add(getDefauldMarker(model, context));
+            // markerList.add(getDefauldMarker(model, context));
           },
         ),
       ],
       actionsAlignment: MainAxisAlignment.spaceAround,
       backgroundColor: Colors.white54,
     );
-
-    return returnDialog;
   }
 }
