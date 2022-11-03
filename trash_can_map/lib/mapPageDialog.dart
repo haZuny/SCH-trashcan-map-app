@@ -14,6 +14,9 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io'; // 파일
 import 'mapPage.dart';
 
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
 
 
 Color bckColor = Colors.white;
@@ -55,7 +58,7 @@ class MakerClickDialog extends StatelessWidget {
                     ? Image.asset(
                         'lib/sub/imgNotLoad.png',
                       )
-                    : trash.image!)
+                    : Image.file(trash.image!))
           ],
         ),
         width: changePercentSizeToPixel(context, 70, true),
@@ -128,11 +131,13 @@ class GetInputAddTrashDialog extends StatefulWidget {
 class _GetInputAddTrashDialog extends State<GetInputAddTrashDialog> {
   TextEditingController textController = TextEditingController();
   Image image = Image.asset('lib/sub/imgNotLoad.png');
+  File? imgFile;
   ImagePicker imgPicker = ImagePicker();
-  late LatLng pos;
-  late List<TrashModel> trashList;
-  late List<Marker> markerList;
-  bool isImagePick = false;
+  late LatLng pos;  // 추가되는 위치
+  late List<TrashModel> trashList;  // 휴지통 리스트
+  late List<Marker> markerList; // 마커 리스트
+  bool isImagePick = false; // 이미지 찍혔는지 플래그
+    final String serverIP = 'http://172.30.1.58:8000/bins/';  // 서버 ip 주소
 
   _GetInputAddTrashDialog(
       LatLng pos, List<TrashModel> trashList, List<Marker> markerList) {
@@ -181,9 +186,10 @@ class _GetInputAddTrashDialog extends State<GetInputAddTrashDialog> {
           child: new Text("사진 찍기"),
           onPressed: () async {
             final f = await imgPicker.getImage(source: ImageSource.camera);
-            Image img = Image.file(File(f!.path));
+            imgFile = (File(f!.path));
             setState(() {
-              image = img;
+              image = Image.file(imgFile!);
+
               isImagePick = true;
             });
           },
@@ -206,7 +212,7 @@ class _GetInputAddTrashDialog extends State<GetInputAddTrashDialog> {
                 pos.longitude,
                 DateTime.now(),
                 textController.text,
-                image: image);
+                image: imgFile);
 
             // 리스트에 추가
               trashList.add(model);
@@ -216,5 +222,33 @@ class _GetInputAddTrashDialog extends State<GetInputAddTrashDialog> {
       actionsAlignment: MainAxisAlignment.spaceAround,
       backgroundColor: bckColor,
     );
+  }
+
+
+  // post 메소드
+  Future<int> sendTrashModel(TrashModel t) async {
+    Uri url = Uri.parse(serverIP);
+    late String id;
+    late double latitude; // x좌표
+    late double longitude;  //y좌표
+    late DateTime registeredTime; // 등록일시(date 필드)
+    late String posDescription; // 설명
+    Image? image; // 이미지(파일필드)
+
+    var response = await http.post(Uri.parse(serverIP), body: json.encode({'id':'',
+      'latitude': '${pos.latitude}',
+      'longitude': '${pos.longitude}',
+    'registeredTime':'${DateTime.now()}',
+    'posDesciption':'${textController.text}',
+    'image':''}));
+
+    print(response.statusCode);
+
+
+
+
+
+
+    return 0;
   }
 }
