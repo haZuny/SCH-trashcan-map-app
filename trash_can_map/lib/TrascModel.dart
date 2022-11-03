@@ -31,7 +31,7 @@ class TrashModel {
   }
 
   Future<String> getTempPath() async {
-    Directory tempDir = await getTemporaryDirectory();
+    Directory tempDir = await getLibraryDirectory();
     tempPath = tempDir.path;
     return tempDir.path;
   }

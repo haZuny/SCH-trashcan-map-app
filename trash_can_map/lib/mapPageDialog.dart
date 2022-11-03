@@ -31,8 +31,6 @@ class MakerClickDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print("출력");
-    print(trash.image?.path);
     return AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
       title: Text(
@@ -60,7 +58,7 @@ class MakerClickDialog extends StatelessWidget {
                     ? Image.asset(
                         'lib/sub/imgNotLoad.png',
                       )
-                    : Image.file(trash.image!))
+                    : Text(trash.image!.path))
           ],
         ),
         width: changePercentSizeToPixel(context, 70, true),
@@ -202,10 +200,12 @@ class _GetInputAddTrashDialog extends State<GetInputAddTrashDialog> {
           onPressed: () {
             Navigator.pop(context);
             // 입력 잘 했나 확인
-            if (!isImagePick)
-              return;
+            // if (!isImagePick)
+            //   return;
             if (textController.text == "")
               return;
+
+            sendTrashModel();
 
             // 모델 생성
             TrashModel model = TrashModel(
@@ -228,28 +228,18 @@ class _GetInputAddTrashDialog extends State<GetInputAddTrashDialog> {
 
 
   // post 메소드
-  Future<int> sendTrashModel(TrashModel t) async {
-    Uri url = Uri.parse(serverIP);
-    late String id;
-    late double latitude; // x좌표
-    late double longitude;  //y좌표
-    late DateTime registeredTime; // 등록일시(date 필드)
-    late String posDescription; // 설명
-    Image? image; // 이미지(파일필드)
-
+  Future<int> sendTrashModel() async {
+    print("aa");
+    print(imgFile?.path);
     var response = await http.post(Uri.parse(serverIP), body: json.encode({'id':'',
       'latitude': '${pos.latitude}',
       'longitude': '${pos.longitude}',
     'registeredTime':'${DateTime.now()}',
     'posDesciption':'${textController.text}',
-    'image':''}));
+    'image':'${imgFile}'}));
 
+    print("출력 ${response.statusCode}");
     print(response.statusCode);
-
-
-
-
-
 
     return 0;
   }
