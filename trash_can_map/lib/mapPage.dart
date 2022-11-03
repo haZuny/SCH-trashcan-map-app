@@ -57,8 +57,8 @@ class _MapPage extends State<MapPage> {
   initState() {
     super.initState();
     // 쓰레기통 리스트 추가
-    trashList.add(TrashModel('1', 37.390044125547675, 126.81151201344588,
-        DateTime.now(), "놀이터 시소 옆"));
+    trashList.add(TrashModel('1', 36.7691, 126.9323,
+        DateTime.now(), "공학관 뒷편 휴지통"));
     trashList.add(TrashModel(
         '2', 37.39019780692878, 126.81173240672312, DateTime.now(), "나무 의자 앞"));
     trashList.add(TrashModel(
@@ -77,31 +77,34 @@ class _MapPage extends State<MapPage> {
   Widget build(BuildContext context2) {
     return Scaffold(
         appBar: AppBar(
-          title: Row(children: [
-            // 검색 택스트 필드
-            Expanded(
-              child: TextField(
-                controller: searchingMapTextController,
-                // 모양잡기
-                decoration: const InputDecoration(
-                  hintText: '장소, 주소 입력',
-                  labelText: '검색',
-                ),
-              ),
-            ),
-            // 검색 버튼
-            GestureDetector(
-                child: Positioned(
-                  child: Icon(
-                    Icons.search,
-                    color: Colors.black87,
-                  ),
-                ),
-                onTap: () {
-                  setState(() {
-                    searchingMapTextController.text = "";
-                  });
-                })
+          title: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,children: [
+            Image.asset('lib/sub/title.png', width: changePercentSizeToPixel(context, 25, true),),
+
+            Image.asset('lib/sub/logo.png', width: changePercentSizeToPixel(context, 15, true),)
+        //     // 검색 택스트 필드
+        //     Expanded(
+        //       child: TextField(
+        //         controller: searchingMapTextController,
+        //         // 모양잡기
+        //         decoration: const InputDecoration(
+        //           hintText: '장소, 주소 입력',
+        //           labelText: '검색',
+        //         ),
+        //       ),
+        //     ),
+        //     // 검색 버튼
+        //     GestureDetector(
+        //         child: Positioned(
+        //           child: Icon(
+        //             Icons.search,
+        //             color: Colors.black87,
+        //           ),
+        //         ),
+        //         onTap: () {
+        //           setState(() {
+        //             searchingMapTextController.text = "";
+        //           });
+        //         })
           ]),
           backgroundColor: Colors.white,
         ),

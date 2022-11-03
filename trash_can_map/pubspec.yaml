@@ -64,6 +64,8 @@ flutter:
 
   assets:
     - lib/sub/imgNotLoad.png
+    - lib/sub/title.png
+    - lib/sub/logo.png
 
   # To add assets to your application, add an assets section, like this:
   # assets:

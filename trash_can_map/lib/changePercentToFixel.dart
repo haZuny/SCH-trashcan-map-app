@@ -7,7 +7,7 @@ double changePercentSizeToPixel(BuildContext context, double percent, bool isWid
   // 디바이스 가로세로 크기
   double deviceHeight = MediaQuery.of(context).size.height;
   // double deviceWidth = MediaQuery.of(context).size.width;
-  double deviceWidth = deviceHeight * 16 / 9;
+  double deviceWidth = MediaQuery.of(context).size.width;
 
   if(isWidth){
     print(percent * deviceWidth / 100);

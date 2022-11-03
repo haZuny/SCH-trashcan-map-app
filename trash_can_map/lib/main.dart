@@ -88,13 +88,13 @@ class _MainPage extends State<MainPage> with SingleTickerProviderStateMixin {
                   icon: Icon(
                 Icons.pin_drop,
                 color: mapIconColor,
-                size: changePercentSizeToPixel(context, 2.2, true),
+                size: changePercentSizeToPixel(context, 10, true),
               )),
               Tab(
                 icon: Icon(
                   Icons.forum,
                   color: comuIconColor,
-                  size: changePercentSizeToPixel(context, 2.2, true),
+                  size: changePercentSizeToPixel(context, 10, true),
                 ),
               )
             ],
