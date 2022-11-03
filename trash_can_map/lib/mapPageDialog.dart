@@ -31,6 +31,8 @@ class MakerClickDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print("출력");
+    print(trash.image?.path);
     return AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
       title: Text(
