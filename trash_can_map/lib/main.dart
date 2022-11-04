@@ -76,20 +76,20 @@ class _MainPage extends State<MainPage> with SingleTickerProviderStateMixin {
           // 네비게이터 꾸미기
           decoration: BoxDecoration(
               border: Border(
-            top: BorderSide(
-              color: Colors.black,
-              width: 0.1,
-            ),
-          )),
+                top: BorderSide(
+                  color: Colors.black,
+                  width: 0.1,
+                ),
+              )),
           child: TabBar(
             controller: tabController,
             tabs: [
               Tab(
                   icon: Icon(
-                Icons.pin_drop,
-                color: mapIconColor,
-                size: changePercentSizeToPixel(context, 10, true),
-              )),
+                    Icons.pin_drop,
+                    color: mapIconColor,
+                    size: changePercentSizeToPixel(context, 10, true),
+                  )),
               Tab(
                 icon: Icon(
                   Icons.forum,

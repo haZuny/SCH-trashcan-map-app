@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+// import 'dart:html';
 
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart'; // 구글맵 api
@@ -15,9 +16,10 @@ import 'dart:io'; // 파일
 import 'mapPage.dart';
 
 import 'package:http/http.dart' as http;
+import 'package:dio/dio.dart';
 import 'dart:convert';
 
-
+import 'package:file_picker/file_picker.dart';
 
 Color bckColor = Colors.white;
 
@@ -131,13 +133,14 @@ class GetInputAddTrashDialog extends StatefulWidget {
 class _GetInputAddTrashDialog extends State<GetInputAddTrashDialog> {
   TextEditingController textController = TextEditingController();
   Image image = Image.asset('lib/sub/imgNotLoad.png');
+  XFile? imgXFile;
   File? imgFile;
   ImagePicker imgPicker = ImagePicker();
-  late LatLng pos;  // 추가되는 위치
-  late List<TrashModel> trashList;  // 휴지통 리스트
+  late LatLng pos; // 추가되는 위치
+  late List<TrashModel> trashList; // 휴지통 리스트
   late List<Marker> markerList; // 마커 리스트
   bool isImagePick = false; // 이미지 찍혔는지 플래그
-    final String serverIP = 'http://172.30.1.58:8000/bins/';  // 서버 ip 주소
+  final String serverIP = 'http://220.69.208.121:8000/trash/'; // 서버 ip 주소
 
   _GetInputAddTrashDialog(
       LatLng pos, List<TrashModel> trashList, List<Marker> markerList) {
@@ -163,15 +166,15 @@ class _GetInputAddTrashDialog extends State<GetInputAddTrashDialog> {
             Row(
               children: [
                 Flexible(
-                    child: Container(child: TextField(
-            controller: textController,
-            decoration: const InputDecoration(
-              hintText: '위치를 자세히 설명해주세요.',
-              labelText: '위치 설명',
-
-            )),
-                      margin: EdgeInsets.only(bottom: 20),
-      ))
+                    child: Container(
+                  child: TextField(
+                      controller: textController,
+                      decoration: const InputDecoration(
+                        hintText: '위치를 자세히 설명해주세요.',
+                        labelText: '위치 설명',
+                      )),
+                  margin: EdgeInsets.only(bottom: 20),
+                ))
               ],
             ),
             // 이미지
@@ -185,8 +188,8 @@ class _GetInputAddTrashDialog extends State<GetInputAddTrashDialog> {
         TextButton(
           child: new Text("사진 찍기"),
           onPressed: () async {
-            final f = await imgPicker.getImage(source: ImageSource.camera);
-            imgFile = (File(f!.path));
+            imgXFile = await imgPicker.pickImage(source: ImageSource.camera) as XFile?;
+            imgFile = (File(imgXFile!.path));
             setState(() {
               image = Image.file(imgFile!);
 
@@ -202,8 +205,7 @@ class _GetInputAddTrashDialog extends State<GetInputAddTrashDialog> {
             // 입력 잘 했나 확인
             // if (!isImagePick)
             //   return;
-            if (textController.text == "")
-              return;
+            if (textController.text == "") return;
 
             sendTrashModel();
 
@@ -212,12 +214,11 @@ class _GetInputAddTrashDialog extends State<GetInputAddTrashDialog> {
                 (trashList.length + 1).toString(),
                 pos.latitude,
                 pos.longitude,
-                DateTime.now(),
                 textController.text,
                 image: imgFile);
 
             // 리스트에 추가
-              trashList.add(model);
+            trashList.add(model);
           },
         ),
       ],
@@ -226,20 +227,24 @@ class _GetInputAddTrashDialog extends State<GetInputAddTrashDialog> {
     );
   }
 
-
   // post 메소드
   Future<int> sendTrashModel() async {
     print("aa");
     print(imgFile?.path);
-    var response = await http.post(Uri.parse(serverIP), body: json.encode({'id':'',
+
+    FormData formData = FormData.fromMap({
+      'id': '${pos.latitude}, ${pos.longitude}',
       'latitude': '${pos.latitude}',
       'longitude': '${pos.longitude}',
-    'registeredTime':'${DateTime.now()}',
-    'posDesciption':'${textController.text}',
-    'image':'${imgFile}'}));
+      // 'registeredTime': '${DateTime.now()}',
+      'posDescription': '${textController.text}',
+      'image': await MultipartFile.fromFile(imgFile!.path)
+    });
 
-    print("출력 ${response.statusCode}");
-    print(response.statusCode);
+    var dio = new Dio();
+    var response = await dio.post(serverIP, data: formData);
+    print("출력");
+    print(json.decode(response.data));
 
     return 0;
   }

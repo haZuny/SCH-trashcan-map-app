@@ -3,6 +3,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart'; // 구글맵 api
 import 'package:location/location.dart'; // 현재 좌표 구하기
@@ -52,25 +53,30 @@ class _MapPage extends State<MapPage> {
   Image image = Image.asset('lib/sub/imgNotLoad.png');
   ImagePicker imgPicker = ImagePicker();
 
+  final String serverIP = 'http://220.69.208.121:8000/trash/'; // 서버 ip 주소
+
   // 상태 초기화
   @override
   initState() {
     super.initState();
     // 쓰레기통 리스트 추가
-    trashList.add(TrashModel('1', 36.7691, 126.9323,
-        DateTime.now(), "공학관 뒷편 휴지통"));
-    trashList.add(TrashModel(
-        '2', 37.39019780692878, 126.81173240672312, DateTime.now(), "나무 의자 앞"));
-    trashList.add(TrashModel(
-        '3', 37.389893506516614, 126.81160330525684, DateTime.now(), "화장실 문쪽"));
-    trashList.add(TrashModel('4', 37.38976810517254, 126.81206942919309,
-        DateTime.now(), "아파트 분리수거장(매주 수)"));
-    trashList.add(TrashModel('1', 37.389764733403986, 126.81136648780914,
-        DateTime.now(), "도서관 입구 안쪽"));
-    // 마커 추가
-    for (TrashModel trash in trashList) {
-      markerList.add(getDefauldMarker(trash, context));
-    }
+    // trashList.add(TrashModel('1', 36.7691, 126.9323,
+    //     DateTime.now(), "공학관 뒷편 휴지통"));
+    // trashList.add(TrashModel(
+    //     '2', 37.39019780692878, 126.81173240672312, DateTime.now(), "나무 의자 앞"));
+    // trashList.add(TrashModel(
+    //     '3', 37.389893506516614, 126.81160330525684, DateTime.now(), "화장실 문쪽"));
+    // trashList.add(TrashModel('4', 37.38976810517254, 126.81206942919309,
+    //     DateTime.now(), "아파트 분리수거장(매주 수)"));
+    // trashList.add(TrashModel('1', 37.389764733403986, 126.81136648780914,
+    //     DateTime.now(), "도서관 입구 안쪽"));
+    // // 마커 추가
+    // for (TrashModel trash in trashList) {
+    //   markerList.add(getDefauldMarker(trash, context));
+    // }
+
+    // get
+    getTrashModel(trashList, markerList);
   }
 
   @override
@@ -81,30 +87,6 @@ class _MapPage extends State<MapPage> {
             Image.asset('lib/sub/title.png', width: changePercentSizeToPixel(context, 25, true),),
 
             Image.asset('lib/sub/logo.png', width: changePercentSizeToPixel(context, 15, true),)
-        //     // 검색 택스트 필드
-        //     Expanded(
-        //       child: TextField(
-        //         controller: searchingMapTextController,
-        //         // 모양잡기
-        //         decoration: const InputDecoration(
-        //           hintText: '장소, 주소 입력',
-        //           labelText: '검색',
-        //         ),
-        //       ),
-        //     ),
-        //     // 검색 버튼
-        //     GestureDetector(
-        //         child: Positioned(
-        //           child: Icon(
-        //             Icons.search,
-        //             color: Colors.black87,
-        //           ),
-        //         ),
-        //         onTap: () {
-        //           setState(() {
-        //             searchingMapTextController.text = "";
-        //           });
-        //         })
           ]),
           backgroundColor: Colors.white,
         ),
@@ -326,6 +308,30 @@ class _MapPage extends State<MapPage> {
         zoom: 18,
       ),
     ));
+  }
+
+  // get메소드, 정보 받아와서 마커, 쓰레기 리스트 수정
+  Future<int> getTrashModel(List<TrashModel> trashList2, List<Marker> markerList2) async {
+
+    var dio = new Dio();
+    var response = await dio.get(serverIP);
+    print("출력");
+    var getData = response.data;
+    print(getData);
+
+    trashList.clear();
+    markerList.clear();
+
+    setState(() {
+      for(var trash in getData){
+        trashList.add(TrashModel(trash['id'], trash['latitude'], trash['longitude'], trash['posDescription'], registeredTime: trash['registeredTime'], image: trash['image']));
+        markerList.add(getDefauldMarker(trashList.last, context));
+      }
+    });
+
+
+
+    return 0;
   }
 }
 

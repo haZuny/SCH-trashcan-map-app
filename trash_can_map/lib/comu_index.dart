@@ -13,8 +13,8 @@ class IndexPage extends StatelessWidget{
       return(Scaffold(
         body: Container(child: Column(children: [
           ElevatedButton(onPressed: () async {
-              var res = await http.get(Uri.parse('http://172.30.1.58:8000/bins/5'));
-              var res2 = await http.post(Uri.parse('http://172.30.1.58:8000/bins/'), body: json.encode({'id':'', 'x_location': '500', 'y_location': '500'}));
+              var res = await http.get(Uri.parse('http://220.69.208.121:8000/bins/1'));
+              var res2 = await http.post(Uri.parse('http://220.69.208.121:8000/bins/'), body: json.encode({'id':'', 'latitude': '500', 'longitude': '500', 'registeredTime':'ㅁ', 'posDescription':'aaa', }));
               print(json.decode(res.body));
               print(res2.statusCode);
               print(json.decode(res2.body));
