@@ -26,9 +26,11 @@ Color bckColor = Colors.white;
 // 마커 클릭 다이얼로그
 class MakerClickDialog extends StatelessWidget {
   late TrashModel trash;
+  String serverIP = 'http://220.69.208.121:8000/trash/';
 
   MakerClickDialog(TrashModel trash) {
     this.trash = trash;
+    getTrashImage();
   }
 
   @override
@@ -76,6 +78,16 @@ class MakerClickDialog extends StatelessWidget {
       ],
       backgroundColor: bckColor,
     );
+  }
+
+  // Get 메소드
+  Future<int> getTrashImage() async {
+
+    var dio = Dio();
+    var response = await dio.get(serverIP + trash.id);
+    print(response is File);
+
+    return 0;
   }
 }
 
@@ -207,11 +219,11 @@ class _GetInputAddTrashDialog extends State<GetInputAddTrashDialog> {
             //   return;
             if (textController.text == "") return;
 
-            sendTrashModel();
+            var id = sendTrashModel();
 
             // 모델 생성
             TrashModel model = TrashModel(
-                (trashList.length + 1).toString(),
+                id.toString(),
                 pos.latitude,
                 pos.longitude,
                 textController.text,
@@ -233,19 +245,18 @@ class _GetInputAddTrashDialog extends State<GetInputAddTrashDialog> {
     print(imgFile?.path);
 
     FormData formData = FormData.fromMap({
-      'id': '${pos.latitude}, ${pos.longitude}',
+      'id': '',
       'latitude': '${pos.latitude}',
       'longitude': '${pos.longitude}',
-      // 'registeredTime': '${DateTime.now()}',
+      'registeredTime': '',
       'posDescription': '${textController.text}',
       'image': await MultipartFile.fromFile(imgFile!.path)
     });
 
     var dio = new Dio();
     var response = await dio.post(serverIP, data: formData);
-    print("출력");
-    print(json.decode(response.data));
+    print(response.data.toString());
 
-    return 0;
+    return response.data['io'];
   }
 }

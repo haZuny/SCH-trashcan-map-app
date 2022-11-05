@@ -315,7 +315,7 @@ class _MapPage extends State<MapPage> {
 
     var dio = new Dio();
     var response = await dio.get(serverIP);
-    print("출력");
+    print("출력2");
     var getData = response.data;
     print(getData);
 
@@ -324,13 +324,13 @@ class _MapPage extends State<MapPage> {
 
     setState(() {
       for(var trash in getData){
-        trashList.add(TrashModel(trash['id'], trash['latitude'], trash['longitude'], trash['posDescription'], registeredTime: trash['registeredTime'], image: trash['image']));
+        trashList.add(TrashModel(trash['id'].toString(), trash['latitude'], trash['longitude'], trash['posDescription'], registeredTime: trash['registeredTime'],));
         markerList.add(getDefauldMarker(trashList.last, context));
       }
     });
 
 
-
+    print("성공성공");
     return 0;
   }
 }
