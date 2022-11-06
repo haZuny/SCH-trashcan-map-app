@@ -17,6 +17,7 @@ from django.core.files import File
 from django.http import FileResponse
 
 import chardet
+import base64
 
 # Create your views here.
 # class TrashViewSet(viewsets.ModelViewSet):
@@ -68,8 +69,15 @@ class TrashDetail(APIView):
         
         # 이미지 파일
         imgF = open('.'+seriizer.data['image'], 'rb')
-        respense = FileResponse(imgF)
+        data = imgF.read()
+        # print(data)
+        
+        sendData = []
+        obj = {}
+        obj['img'] = base64.b64encode(data)
+        sendData.append(obj)
+        # respense = FileResponse(imgF)
 
-        return respense
+        return Response(sendData)
 
 

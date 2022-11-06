@@ -172,7 +172,7 @@ class _MapPage extends State<MapPage> {
                     late Marker marker;
                     double minDistance = 9999999;
                     int minIdx = 0;
-                    for (int i = 0; i < markerList.length; i++) {
+                    for (int i = 0; i < trashList.length; i++) {
                       double distance = sqrt(pow(
                               currendLoc.latitude! -
                                   markerList[i].position.latitude,
@@ -240,59 +240,65 @@ class _MapPage extends State<MapPage> {
                       currendLoc = await location.getLocation();
                       _moveLocation(currendLoc);
                       // 마커 리스트에 추가
-                      markerList.add(Marker(
-                          markerId: MarkerId("-1"),
-                          position: LatLng(
-                              currendLoc.latitude!, currendLoc.longitude!),
-                          draggable: true,
 
-                          // 추가 마커 한번 터치
-                          onTap: () {
-                            HapticFeedback.vibrate();
-                            setState(() {
+                      setState(() {
+                        markerList.add(Marker(
+                            markerId: MarkerId("-1"),
+                            position: LatLng(
+                                currendLoc.latitude!, currendLoc.longitude!),
+                            draggable: true,
+
+                            // 추가 마커 한번 터치
+                            onTap: () {
+                              HapticFeedback.vibrate();
+                              setState(() {
+                                setState(() {
+                                  markerList.removeLast();
+                                });
+                                canAttTrash = true;
+                              });
+                            },
+
+                            // 추가마커 드래그 시작
+                            onDragStart: (LatLag) => HapticFeedback.vibrate(),
+
+                            // 추가마커 드래그 끝
+                            onDragEnd: (LatLng pos) {
                               setState(() {
                                 markerList.removeLast();
                               });
                               canAttTrash = true;
-                            });
-                          },
 
-                          // 추가마커 드래그 시작
-                          onDragStart: (LatLag) => HapticFeedback.vibrate(),
-
-                          // 추가마커 드래그 끝
-                          onDragEnd: (LatLng pos) {
-                            setState(() {
-                              markerList.removeLast();
-                            });
-                            canAttTrash = true;
-
-                            // 다이얼로그 생성
-                            showDialog(
+                              // 다이얼로그 생성
+                              showDialog(
                                 context: context,
                                 builder: (context) {
                                   return GetInputAddTrashDialog(
-                                      pos, trashList, markerList);
-                                }).then((value) {
-                              if (trashList.length > markerList.length) {
-                                TrashModel trash = trashList.last;
+                                      pos, trashList, markerList, context2);
+                                },
+                              ).then((value) {
+
+                                if(trashList.length > markerList.length){
+
                                 setState(() {
-                                  markerList
-                                      .add(getDefauldMarker(trash, context));
+                                  markerList.add(getDefauldMarker(trashList.last, context));
                                 });
-                              } else {
-                                showDialog(
-                                    context: context,
-                                    builder: (context) {
-                                      return AlertDialog(
-                                        title: Text("오류"),
-                                        content: Text("정보를 제대로 입력해주세요."),
-                                        backgroundColor: Colors.white70,
-                                      );
-                                    });
-                              }
-                            });
-                          }));
+                                }
+                                else{
+                                  showDialog(
+                                      context: context,
+                                      builder: (context) {
+                                        return AlertDialog(
+                                          title: Text("오류"),
+                                          content: Text("정보를 제대로 입력해주세요."),
+                                          backgroundColor: Colors.white70,
+                                        );
+                                      });
+                                }
+
+                              });
+                            }));
+                      });
                     }
                   },
                 ),
@@ -345,36 +351,28 @@ class _MapPage extends State<MapPage> {
 // Get 메소드
 Future<dynamic> getTrashImage(TrashModel trash) async {
   var dio = Dio();
-  var res = await http.get(Uri.parse('http://220.69.208.121:8000/trash/${trash.id}'));
+  var res = await dio.get('http://220.69.208.121:8000/trash/${trash.id}');
+  Image img = Image.memory(base64Decode(res.data[0]['img']));
 
-  // 바이트 어레이 전환
-  // print('니가 그렇게 잘나가?');
-  // print("씨발");
-  // Uint8List bytes = base64.decode(res.body);
-  // print(bytes);
-  // print("씨발");
-
-
-
-  Image img = Image.memory(base64Decode(res.body));
-
-  return 'a';
+  return img;
 }
 
 Marker getDefauldMarker(TrashModel trash, BuildContext context) {
-  var serverIP = 'http://127.0.0.1:8000/trash/';
+  var serverIP = 'http://220.69.208.121:8000/trash/';
   return Marker(
       markerId: MarkerId(trash.id),
       position: LatLng(trash.latitude, trash.longitude),
       icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
       // 마커 클릭
       onTap: () async {
-        var newTrash = TrashModel(trash.id, trash.latitude, trash.longitude, trash.posDescription, image: await getTrashImage(trash));
+        var newTrash = TrashModel(
+            trash.id, trash.latitude, trash.longitude, trash.posDescription,
+            image: await getTrashImage(trash));
 
-          showDialog(
-              context: Scaffold.of(context).context,
-              builder: (context) {
-                return MakerClickDialog(newTrash);
-              });
+        showDialog(
+            context: Scaffold.of(context).context,
+            builder: (context) {
+              return MakerClickDialog(newTrash);
+            });
       });
 }

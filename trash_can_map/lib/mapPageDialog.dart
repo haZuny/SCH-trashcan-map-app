@@ -37,17 +37,8 @@ class MakerClickDialog extends StatelessWidget {
     this.trash = trash;
   }
 
-  // @override
-  // initState() {
-  //   getTrashImage(trash).then((value) {
-  //     trash.image = value;
-  //   });
-  // }
-
   @override
   Widget build(BuildContext context) {
-
-
     return AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
       title: Text(
@@ -144,17 +135,19 @@ class GetInputAddTrashDialog extends StatefulWidget {
   late LatLng pos;
   late List<TrashModel> trashList;
   late List<Marker> markerList;
+  late BuildContext context2;
 
-  GetInputAddTrashDialog(
-      LatLng pos, List<TrashModel> trashList, List<Marker> markerList) {
+  GetInputAddTrashDialog(LatLng pos, List<TrashModel> trashList,
+      List<Marker> markerList, BuildContext context2) {
     this.pos = pos;
     this.trashList = trashList;
     this.markerList = markerList;
+    this.context2 = context2;
   }
 
   @override
   State<GetInputAddTrashDialog> createState() =>
-      _GetInputAddTrashDialog(pos, trashList, markerList);
+      _GetInputAddTrashDialog(pos, trashList, markerList, context2);
 }
 
 class _GetInputAddTrashDialog extends State<GetInputAddTrashDialog> {
@@ -166,14 +159,16 @@ class _GetInputAddTrashDialog extends State<GetInputAddTrashDialog> {
   late LatLng pos; // 추가되는 위치
   late List<TrashModel> trashList; // 휴지통 리스트
   late List<Marker> markerList; // 마커 리스트
+  late BuildContext context2;
   bool isImagePick = false; // 이미지 찍혔는지 플래그
   final String serverIP = 'http://220.69.208.121:8000/trash/'; // 서버 ip 주소
 
-  _GetInputAddTrashDialog(
-      LatLng pos, List<TrashModel> trashList, List<Marker> markerList) {
+  _GetInputAddTrashDialog(LatLng pos, List<TrashModel> trashList,
+      List<Marker> markerList, BuildContext context2) {
     this.pos = pos;
     this.trashList = trashList;
     this.markerList = markerList;
+    this.context2 = context2;
   }
 
   @override
@@ -228,25 +223,39 @@ class _GetInputAddTrashDialog extends State<GetInputAddTrashDialog> {
         // 확인버튼
         TextButton(
           child: new Text("확인"),
-          onPressed: () {
-            Navigator.pop(context);
+          onPressed: () async {
             // 입력 잘 했나 확인
-            // if (!isImagePick)
-            //   return;
-            if (textController.text == "") return;
+            if (textController.text == ""){
+              print("종료1");
+              Navigator.pop(context);
+              return;
+            }
+            else if (!isImagePick){
+              print('종료2');
+              Navigator.pop(context);
+              return;
 
-            var id = sendTrashModel();
+            }
+            else {
+              Navigator.pop(context);
+              // 정보 전송
+              sendTrashModel().then((value) {
+                // 모델 생성
+                TrashModel model = TrashModel(
+                  value.toString(),
+                  pos.latitude,
+                  pos.longitude,
+                  textController.text,
+                );
 
-            // 모델 생성
-            TrashModel model = TrashModel(
-              id.toString(),
-              pos.latitude,
-              pos.longitude,
-              textController.text,
-            );
-
-            // 리스트에 추가
-            trashList.add(model);
+                // 리스트에 추가
+                setState(() {
+                  trashList.add(model);
+                  print(model.id);
+                  print("이거지");
+                });
+              });
+            }
           },
         ),
       ],
@@ -269,6 +278,6 @@ class _GetInputAddTrashDialog extends State<GetInputAddTrashDialog> {
     var dio = new Dio();
     var response = await dio.post(serverIP, data: formData);
 
-    return response.data['io'];
+    return response.data['id'];
   }
 }
