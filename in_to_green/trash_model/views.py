@@ -25,6 +25,7 @@ from django.http import FileResponse
 # 전체 게시물
 class TrashList(APIView):
     def post(self, request):
+        print("포스트")
         serializer = TrashSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -66,10 +67,11 @@ class TrashDetail(APIView):
         seriizer = TrashSerializer(trash)
         
         # 이미지 파일
-        print(seriizer.data)
         imgF = open('.'+seriizer.data['image'], 'rb')
+
+        print(imgF)
         respense = FileResponse(imgF)
 
-        return respense;
+        return respense
 
 

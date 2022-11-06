@@ -7,6 +7,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart'; // 구글맵 api
 import 'package:location/location.dart'; // 현재 좌표 구하기
 import 'package:flutter/gestures.dart'; // 지도 제스처
 import 'package:flutter/foundation.dart'; // 지도 제스처
+import 'package:path_provider/path_provider.dart';
 import 'TrascModel.dart'; // 휴지통 모델
 import 'changePercentToFixel.dart'; // 화면 픽셀 계산
 import 'package:flutter/services.dart'; // 진동
@@ -21,6 +22,10 @@ import 'dart:convert';
 
 import 'package:file_picker/file_picker.dart';
 
+import 'package:path/path.dart';
+
+import 'package:cp949/cp949.dart' as cp949; // cp949 이진 파일 디코딩
+
 Color bckColor = Colors.white;
 
 // 마커 클릭 다이얼로그
@@ -30,11 +35,19 @@ class MakerClickDialog extends StatelessWidget {
 
   MakerClickDialog(TrashModel trash) {
     this.trash = trash;
-    getTrashImage();
   }
+
+  // @override
+  // initState() {
+  //   getTrashImage(trash).then((value) {
+  //     trash.image = value;
+  //   });
+  // }
 
   @override
   Widget build(BuildContext context) {
+
+
     return AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
       title: Text(
@@ -62,7 +75,7 @@ class MakerClickDialog extends StatelessWidget {
                     ? Image.asset(
                         'lib/sub/imgNotLoad.png',
                       )
-                    : Text(trash.image!.path))
+                    : trash.image!)
           ],
         ),
         width: changePercentSizeToPixel(context, 70, true),
@@ -81,13 +94,15 @@ class MakerClickDialog extends StatelessWidget {
   }
 
   // Get 메소드
-  Future<int> getTrashImage() async {
-
+  Future<Image> getTrashImage(TrashModel trash) async {
     var dio = Dio();
-    var response = await dio.get(serverIP + trash.id);
-    print(response is File);
+    var res = await dio.get('http://220.69.208.121:8000/trash/${trash.id}');
+    var bytes = utf8.encode(res.data);
 
-    return 0;
+    Uint8List bytes2 = Uint8List.fromList(bytes);
+    // XFile file = XFile.fromData(bytes2);
+    Image img = Image.memory(bytes2);
+    return img;
   }
 }
 
@@ -200,7 +215,8 @@ class _GetInputAddTrashDialog extends State<GetInputAddTrashDialog> {
         TextButton(
           child: new Text("사진 찍기"),
           onPressed: () async {
-            imgXFile = await imgPicker.pickImage(source: ImageSource.camera) as XFile?;
+            imgXFile =
+                await imgPicker.pickImage(source: ImageSource.camera) as XFile?;
             imgFile = (File(imgXFile!.path));
             setState(() {
               image = Image.file(imgFile!);
@@ -223,11 +239,11 @@ class _GetInputAddTrashDialog extends State<GetInputAddTrashDialog> {
 
             // 모델 생성
             TrashModel model = TrashModel(
-                id.toString(),
-                pos.latitude,
-                pos.longitude,
-                textController.text,
-                image: imgFile);
+              id.toString(),
+              pos.latitude,
+              pos.longitude,
+              textController.text,
+            );
 
             // 리스트에 추가
             trashList.add(model);
@@ -241,9 +257,6 @@ class _GetInputAddTrashDialog extends State<GetInputAddTrashDialog> {
 
   // post 메소드
   Future<int> sendTrashModel() async {
-    print("aa");
-    print(imgFile?.path);
-
     FormData formData = FormData.fromMap({
       'id': '',
       'latitude': '${pos.latitude}',
@@ -255,7 +268,6 @@ class _GetInputAddTrashDialog extends State<GetInputAddTrashDialog> {
 
     var dio = new Dio();
     var response = await dio.post(serverIP, data: formData);
-    print(response.data.toString());
 
     return response.data['io'];
   }
