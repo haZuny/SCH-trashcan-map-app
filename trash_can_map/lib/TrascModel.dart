@@ -23,9 +23,7 @@ class TrashModel {
     this.registeredTime = registeredTime;
     this.posDescription = posDescription;
     if (image == null) {
-      getTempPath().then((value) {
         this.image = Image.asset('lib/sub/imgNotLoad.png');
-      });
     } else
       this.image = image;
   }

@@ -9,6 +9,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart'; // 구글맵 api
 import 'package:location/location.dart'; // 현재 좌표 구하기
 import 'package:flutter/gestures.dart'; // 지도 제스처
 import 'package:flutter/foundation.dart'; // 지도 제스처
+import 'package:path_provider/path_provider.dart';
 import 'TrascModel.dart'; // 휴지통 모델
 import 'changePercentToFixel.dart'; // 화면 픽셀 계산
 import 'package:flutter/services.dart'; // 진동
@@ -16,6 +17,9 @@ import 'mapPageDialog.dart'; // 다이얼로그 분리
 import 'dart:math';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io'; // 파일
+
+import 'package:http/http.dart' as http;
+import 'package:dio/dio.dart';
 
 class MapPage extends StatefulWidget {
   @override
@@ -339,18 +343,22 @@ class _MapPage extends State<MapPage> {
 }
 
 // Get 메소드
-Future<Image> getTrashImage(TrashModel trash) async {
+Future<dynamic> getTrashImage(TrashModel trash) async {
   var dio = Dio();
-  var res = await dio.get('http://220.69.208.121:8000/trash/${trash.id}');
-  var bytes = utf8.encode(res.data);
+  var res = await http.get(Uri.parse('http://220.69.208.121:8000/trash/${trash.id}'));
 
-  Uint8List bytes2 = Uint8List.fromList(bytes);
-  // XFile file = XFile.fromData(bytes2);
-  Image img = Image.memory(bytes2);
-  print("하");
-  print(img);
-  print("씨발");
-  return img;
+  // 바이트 어레이 전환
+  // print('니가 그렇게 잘나가?');
+  // print("씨발");
+  // Uint8List bytes = base64.decode(res.body);
+  // print(bytes);
+  // print("씨발");
+
+
+
+  Image img = Image.memory(base64Decode(res.body));
+
+  return 'a';
 }
 
 Marker getDefauldMarker(TrashModel trash, BuildContext context) {
@@ -366,7 +374,6 @@ Marker getDefauldMarker(TrashModel trash, BuildContext context) {
           showDialog(
               context: Scaffold.of(context).context,
               builder: (context) {
-                print(newTrash.image);
                 return MakerClickDialog(newTrash);
               });
       });

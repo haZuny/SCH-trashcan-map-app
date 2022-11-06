@@ -16,6 +16,8 @@ import os
 from django.core.files import File
 from django.http import FileResponse
 
+import chardet
+
 # Create your views here.
 # class TrashViewSet(viewsets.ModelViewSet):
 #     queryset = Trash.objects.all()
@@ -25,7 +27,6 @@ from django.http import FileResponse
 # 전체 게시물
 class TrashList(APIView):
     def post(self, request):
-        print("포스트")
         serializer = TrashSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -48,8 +49,7 @@ class TrashList(APIView):
                     newObj[key] = value
                 # else:
             sendData.append(newObj)
-        
-        # print(sendData)
+    
         return Response(sendData)
         
 
@@ -68,8 +68,6 @@ class TrashDetail(APIView):
         
         # 이미지 파일
         imgF = open('.'+seriizer.data['image'], 'rb')
-
-        print(imgF)
         respense = FileResponse(imgF)
 
         return respense
