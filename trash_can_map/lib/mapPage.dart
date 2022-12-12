@@ -57,6 +57,7 @@ class _MapPage extends State<MapPage> {
   Image image = Image.asset('lib/sub/imgNotLoad.png');
   ImagePicker imgPicker = ImagePicker();
 
+  // final String serverIP = 'http://220.69.208.121:8000/trash/'; // 서버 ip 주소
   final String serverIP = 'http://220.69.208.121:8000/trash/'; // 서버 ip 주소
 
   // 상태 초기화
@@ -350,15 +351,15 @@ class _MapPage extends State<MapPage> {
 
 // Get 메소드
 Future<dynamic> getTrashImage(TrashModel trash) async {
+  final String serverIP = 'http://220.69.208.121:8000/trash/${trash.id}'; // 서버 ip 주소
   var dio = Dio();
-  var res = await dio.get('http://220.69.208.121:8000/trash/${trash.id}');
+  var res = await dio.get(serverIP);
   Image img = Image.memory(base64Decode(res.data[0]['img']));
 
   return img;
 }
 
 Marker getDefauldMarker(TrashModel trash, BuildContext context) {
-  var serverIP = 'http://220.69.208.121:8000/trash/';
   return Marker(
       markerId: MarkerId(trash.id),
       position: LatLng(trash.latitude, trash.longitude),

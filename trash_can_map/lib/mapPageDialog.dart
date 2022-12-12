@@ -24,7 +24,7 @@ import 'package:file_picker/file_picker.dart';
 
 import 'package:path/path.dart';
 
-import 'package:cp949/cp949.dart' as cp949; // cp949 이진 파일 디코딩
+// import 'package:cp949/cp949.dart' as cp949; // cp949 이진 파일 디코딩
 
 Color bckColor = Colors.white;
 
@@ -32,6 +32,8 @@ Color bckColor = Colors.white;
 class MakerClickDialog extends StatelessWidget {
   late TrashModel trash;
   String serverIP = 'http://220.69.208.121:8000/trash/';
+
+  // String serverIP = 'http://127.0.0.1:8000/trash/';
 
   MakerClickDialog(TrashModel trash) {
     this.trash = trash;
@@ -86,8 +88,11 @@ class MakerClickDialog extends StatelessWidget {
 
   // Get 메소드
   Future<Image> getTrashImage(TrashModel trash) async {
+    final String serverIP =
+        'http://220.69.208.121:8000/trash/${trash.id}'; // 서버 ip 주소
+    // final String serverIP = 'http://127.0.0.1:8000/trash/${trash.id}'; // 서버 ip 주소
     var dio = Dio();
-    var res = await dio.get('http://220.69.208.121:8000/trash/${trash.id}');
+    var res = await dio.get(serverIP);
     var bytes = utf8.encode(res.data);
 
     Uint8List bytes2 = Uint8List.fromList(bytes);
@@ -162,6 +167,7 @@ class _GetInputAddTrashDialog extends State<GetInputAddTrashDialog> {
   late BuildContext context2;
   bool isImagePick = false; // 이미지 찍혔는지 플래그
   final String serverIP = 'http://220.69.208.121:8000/trash/'; // 서버 ip 주소
+  // final String serverIP = 'http://127.0.0.1:8000/trash/'; // 서버 ip 주소
 
   _GetInputAddTrashDialog(LatLng pos, List<TrashModel> trashList,
       List<Marker> markerList, BuildContext context2) {
@@ -225,19 +231,15 @@ class _GetInputAddTrashDialog extends State<GetInputAddTrashDialog> {
           child: new Text("확인"),
           onPressed: () async {
             // 입력 잘 했나 확인
-            if (textController.text == ""){
+            if (textController.text == "") {
               print("종료1");
               Navigator.pop(context);
               return;
-            }
-            else if (!isImagePick){
+            } else if (!isImagePick) {
               print('종료2');
               Navigator.pop(context);
               return;
-
-            }
-            else {
-              Navigator.pop(context);
+            } else {
               // 정보 전송
               sendTrashModel().then((value) {
                 // 모델 생성
@@ -252,8 +254,8 @@ class _GetInputAddTrashDialog extends State<GetInputAddTrashDialog> {
                 setState(() {
                   trashList.add(model);
                   print(model.id);
-                  print("이거지");
                 });
+                Navigator.pop(context);
               });
             }
           },
