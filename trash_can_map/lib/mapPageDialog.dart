@@ -24,24 +24,53 @@ import 'package:file_picker/file_picker.dart';
 
 import 'package:path/path.dart';
 
-// import 'package:cp949/cp949.dart' as cp949; // cp949 이진 파일 디코딩
+import 'package:device_info_plus/device_info_plus.dart';
 
 Color bckColor = Colors.white;
 
 // 마커 클릭 다이얼로그
-class MakerClickDialog extends StatelessWidget {
+class MakerClickDialog extends StatefulWidget {
+  late List<TrashModel> trashList;
+  late List<Marker> markerList;
+  String deviceId = '';
+  late TrashModel trash;
+
+  MakerClickDialog(TrashModel trash, String deviceId,
+      List<TrashModel> trashList, List<Marker> markerList) {
+    this.trash = trash;
+    this.deviceId = deviceId;
+    this.trashList = trashList;
+    this.markerList = markerList;
+  }
+
+  @override
+  State createState() =>
+      _MakerClickDialog(trash, deviceId, trashList, markerList);
+}
+
+class _MakerClickDialog extends State {
   late TrashModel trash;
   String serverIP = 'http://220.69.208.121:8000/trash/';
+  String deviceId = '';
+
+  late List<TrashModel> trashList;
+  late List<Marker> markerList;
 
   // String serverIP = 'http://127.0.0.1:8000/trash/';
 
-  MakerClickDialog(TrashModel trash) {
+  _MakerClickDialog(TrashModel trash, String deviceId,
+      List<TrashModel> trashList, List<Marker> markerList) {
     this.trash = trash;
+    this.deviceId = deviceId;
+    this.trashList = trashList;
+    this.markerList = markerList;
   }
 
   @override
   Widget build(BuildContext context) {
+
     return AlertDialog(
+
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
       title: Text(
         "휴지통",
@@ -62,6 +91,9 @@ class MakerClickDialog extends StatelessWidget {
                 )),
               ],
             ),
+            Container(
+              height: 20,
+            ),
             Flexible(
                 fit: FlexFit.tight,
                 child: trash.image == null
@@ -74,7 +106,41 @@ class MakerClickDialog extends StatelessWidget {
         width: changePercentSizeToPixel(context, 70, true),
         height: changePercentSizeToPixel(context, 40, false),
       ),
+
       actions: <Widget>[
+        // 본인이 작성자일 때만 삭제버튼 활성화
+        this.deviceId.compareTo(trash.deviceId) == 0
+            ? new TextButton(
+                style: TextButton.styleFrom(primary: Colors.red),
+                child: new Text("삭제"),
+                onPressed: () async {
+                  // marker 삭제
+                  int i = 0;
+                  for (i = 0; i < markerList.length; i++) {
+                    if (markerList[i].markerId.value == trash.id) {
+                      break;
+                    }
+                  }
+                  setState(() {
+                    markerList.removeAt(i);
+                  });
+
+                  // trash 삭제
+                  i = 0;
+                  for (i = 0; i < trashList.length; i++) {
+                    if (trashList[i].id == trash.id) {
+                      break;
+                    }
+                  }
+                  setState(() {
+                    trashList.removeAt(i);
+                  });
+
+                  Navigator.pop(context);
+                },
+              )
+            : Container(),
+
         new TextButton(
           child: new Text("확인"),
           onPressed: () {
@@ -167,7 +233,7 @@ class _GetInputAddTrashDialog extends State<GetInputAddTrashDialog> {
   late BuildContext context2;
   bool isImagePick = false; // 이미지 찍혔는지 플래그
   final String serverIP = 'http://220.69.208.121:8000/trash/'; // 서버 ip 주소
-  // final String serverIP = 'http://127.0.0.1:8000/trash/'; // 서버 ip 주소
+  String deviceId = '';
 
   _GetInputAddTrashDialog(LatLng pos, List<TrashModel> trashList,
       List<Marker> markerList, BuildContext context2) {
@@ -175,6 +241,7 @@ class _GetInputAddTrashDialog extends State<GetInputAddTrashDialog> {
     this.trashList = trashList;
     this.markerList = markerList;
     this.context2 = context2;
+    setDeviceId();
   }
 
   @override
@@ -243,12 +310,8 @@ class _GetInputAddTrashDialog extends State<GetInputAddTrashDialog> {
               // 정보 전송
               sendTrashModel().then((value) {
                 // 모델 생성
-                TrashModel model = TrashModel(
-                  value.toString(),
-                  pos.latitude,
-                  pos.longitude,
-                  textController.text,
-                );
+                TrashModel model = TrashModel(value.toString(), pos.latitude,
+                    pos.longitude, textController.text, deviceId);
 
                 // 리스트에 추가
                 setState(() {
@@ -274,12 +337,19 @@ class _GetInputAddTrashDialog extends State<GetInputAddTrashDialog> {
       'longitude': '${pos.longitude}',
       'registeredTime': '',
       'posDescription': '${textController.text}',
-      'image': await MultipartFile.fromFile(imgFile!.path)
+      'image': await MultipartFile.fromFile(imgFile!.path),
+      'deviceId': '${this.deviceId}'
     });
 
     var dio = new Dio();
     var response = await dio.post(serverIP, data: formData);
 
     return response.data['id'];
+  }
+
+  Future<String> setDeviceId() async {
+    var android = await DeviceInfoPlugin().androidInfo;
+    this.deviceId = android.id;
+    return android.id;
   }
 }

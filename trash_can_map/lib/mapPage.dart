@@ -3,6 +3,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart'; // 구글맵 api
@@ -158,6 +159,8 @@ class _MapPage extends State<MapPage> {
                     margin: EdgeInsets.only(left: 10, top: 10),
                   ),
                   onTap: () async {
+                    var android = await DeviceInfoPlugin().androidInfo;
+
                     // 깜빡임 구현
                     setState(() {
                       goNestBtnColor = Colors.black87;
@@ -203,7 +206,7 @@ class _MapPage extends State<MapPage> {
                     showDialog(
                         context: context,
                         builder: (BuildContext context) =>
-                            MakerClickDialog(trashList[minIdx]));
+                            MakerClickDialog(trashList[minIdx], android.id, trashList, markerList));
                   },
                 ),
 
@@ -278,14 +281,12 @@ class _MapPage extends State<MapPage> {
                                       pos, trashList, markerList, context2);
                                 },
                               ).then((value) {
-
-                                if(trashList.length > markerList.length){
-
-                                setState(() {
-                                  markerList.add(getDefauldMarker(trashList.last, context));
-                                });
-                                }
-                                else{
+                                if (trashList.length > markerList.length) {
+                                  setState(() async {
+                                    markerList.add(getDefauldMarker(
+                                        trashList.last, context, trashList, markerList));
+                                  });
+                                } else {
                                   showDialog(
                                       context: context,
                                       builder: (context) {
@@ -296,7 +297,6 @@ class _MapPage extends State<MapPage> {
                                         );
                                       });
                                 }
-
                               });
                             }));
                       });
@@ -319,17 +319,20 @@ class _MapPage extends State<MapPage> {
     trashList.clear();
     markerList.clear();
 
-    setState(() {
+    setState(() async {
       for (var trash in getData) {
         trashList.add(TrashModel(
           trash['id'].toString(),
           trash['latitude'],
           trash['longitude'],
           trash['posDescription'],
+          trash['deviceId'],
           registeredTime: trash['registeredTime'],
         ));
 
-        markerList.add(getDefauldMarker(trashList.last, context));
+        print("나라라");
+        print(trashList.last.deviceId);
+        markerList.add(getDefauldMarker(trashList.last, context, trashList, markerList));
       }
     });
 
@@ -351,7 +354,8 @@ class _MapPage extends State<MapPage> {
 
 // Get 메소드
 Future<dynamic> getTrashImage(TrashModel trash) async {
-  final String serverIP = 'http://220.69.208.121:8000/trash/${trash.id}'; // 서버 ip 주소
+  final String serverIP =
+      'http://220.69.208.121:8000/trash/${trash.id}'; // 서버 ip 주소
   var dio = Dio();
   var res = await dio.get(serverIP);
   Image img = Image.memory(base64Decode(res.data[0]['img']));
@@ -359,21 +363,25 @@ Future<dynamic> getTrashImage(TrashModel trash) async {
   return img;
 }
 
-Marker getDefauldMarker(TrashModel trash, BuildContext context) {
+Marker getDefauldMarker(TrashModel trash, BuildContext context, List<TrashModel> trashList,
+    List<Marker> markerList) {
   return Marker(
       markerId: MarkerId(trash.id),
       position: LatLng(trash.latitude, trash.longitude),
       icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
       // 마커 클릭
       onTap: () async {
-        var newTrash = TrashModel(
-            trash.id, trash.latitude, trash.longitude, trash.posDescription,
+        var android = await DeviceInfoPlugin().androidInfo;
+
+        var newTrash = TrashModel(trash.id, trash.latitude, trash.longitude,
+            trash.posDescription, trash.deviceId,
             image: await getTrashImage(trash));
 
         showDialog(
-            context: Scaffold.of(context).context,
+            // context: Scaffold.of(context).context,
+            context: context,
             builder: (context) {
-              return MakerClickDialog(newTrash);
+              return MakerClickDialog(newTrash, android.id, trashList, markerList);
             });
       });
 }

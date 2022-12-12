@@ -10,4 +10,5 @@ class Trash(models.Model):
     registeredTime = models.DateTimeField(auto_now=True)
     posDescription = models.CharField(max_length=500)
     image = models.ImageField(upload_to="", null=True)
+    deviceId = models.CharField(max_length = 500)
         
