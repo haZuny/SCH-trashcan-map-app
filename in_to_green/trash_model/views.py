@@ -67,17 +67,25 @@ class TrashDetail(APIView):
         trash = self.get_object(pk)
         seriizer = TrashSerializer(trash)
         
-        # 이미지 파일
-        imgF = open('.'+seriizer.data['image'], 'rb')
-        data = imgF.read()
-        # print(data)
-        
-        sendData = []
-        obj = {}
-        obj['img'] = base64.b64encode(data)
-        sendData.append(obj)
-        # respense = FileResponse(imgF)
+        # get
+        if request.method == "GET":
+            # 이미지 파일
+            imgF = open('.'+seriizer.data['image'], 'rb')
+            data = imgF.read()
+            # print(data)
+            
+            sendData = []
+            obj = {}
+            obj['img'] = base64.b64encode(data)
+            sendData.append(obj)
+            # respense = FileResponse(imgF)
 
-        return Response(sendData)
+            return Response(sendData)
+
+        elif request.method == "HEAD":
+            print("와이")
+            trash.delete()
+            return Response()
+
 
 
