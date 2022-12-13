@@ -132,7 +132,9 @@ class _MakerClickDialog extends State {
                       break;
                     }
                   }
-                  setState(() {
+
+                  MapPageState? mapState = context.findAncestorStateOfType<MapPageState>();
+                  mapState!.setState(() {
                     trashList.removeAt(i);
                   });
 

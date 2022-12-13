@@ -24,10 +24,10 @@ import 'package:dio/dio.dart';
 
 class MapPage extends StatefulWidget {
   @override
-  State<MapPage> createState() => _MapPage();
+  State<MapPage> createState() => MapPageState();
 }
 
-class _MapPage extends State<MapPage> {
+class MapPageState extends State<MapPage> {
   Location location = new Location(); // 위치 클래스
 
   late LocationData currendLoc; // 사용자 현재 위치
@@ -205,8 +205,11 @@ class _MapPage extends State<MapPage> {
                     // 팝업 띄우기
                     showDialog(
                         context: context,
-                        builder: (BuildContext context) =>
-                            MakerClickDialog(trashList[minIdx], android.id, trashList, markerList));
+                        builder: (BuildContext context) => MakerClickDialog(
+                            trashList[minIdx],
+                            android.id,
+                            trashList,
+                            markerList));
                   },
                 ),
 
@@ -256,11 +259,9 @@ class _MapPage extends State<MapPage> {
                             onTap: () {
                               HapticFeedback.vibrate();
                               setState(() {
-                                setState(() {
-                                  markerList.removeLast();
-                                });
-                                canAttTrash = true;
+                                markerList.removeLast();
                               });
+                              canAttTrash = true;
                             },
 
                             // 추가마커 드래그 시작
@@ -282,9 +283,12 @@ class _MapPage extends State<MapPage> {
                                 },
                               ).then((value) {
                                 if (trashList.length > markerList.length) {
-                                  setState(() async {
+                                  setState(() {
                                     markerList.add(getDefauldMarker(
-                                        trashList.last, context, trashList, markerList));
+                                        trashList.last,
+                                        context,
+                                        trashList,
+                                        markerList));
                                   });
                                 } else {
                                   showDialog(
@@ -319,7 +323,7 @@ class _MapPage extends State<MapPage> {
     trashList.clear();
     markerList.clear();
 
-    setState(() async {
+    setState(() {
       for (var trash in getData) {
         trashList.add(TrashModel(
           trash['id'].toString(),
@@ -330,9 +334,8 @@ class _MapPage extends State<MapPage> {
           registeredTime: trash['registeredTime'],
         ));
 
-        print("나라라");
-        print(trashList.last.deviceId);
-        markerList.add(getDefauldMarker(trashList.last, context, trashList, markerList));
+        markerList.add(
+            getDefauldMarker(trashList.last, context, trashList, markerList));
       }
     });
 
@@ -363,8 +366,8 @@ Future<dynamic> getTrashImage(TrashModel trash) async {
   return img;
 }
 
-Marker getDefauldMarker(TrashModel trash, BuildContext context, List<TrashModel> trashList,
-    List<Marker> markerList) {
+Marker getDefauldMarker(TrashModel trash, BuildContext context,
+    List<TrashModel> trashList, List<Marker> markerList) {
   return Marker(
       markerId: MarkerId(trash.id),
       position: LatLng(trash.latitude, trash.longitude),
@@ -381,7 +384,8 @@ Marker getDefauldMarker(TrashModel trash, BuildContext context, List<TrashModel>
             // context: Scaffold.of(context).context,
             context: context,
             builder: (context) {
-              return MakerClickDialog(newTrash, android.id, trashList, markerList);
+              return MakerClickDialog(
+                  newTrash, android.id, trashList, markerList);
             });
       });
 }
