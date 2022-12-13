@@ -333,9 +333,42 @@ class MapPageState extends State<MapPage> {
           trash['deviceId'],
           registeredTime: trash['registeredTime'],
         ));
+        TrashModel trashBuf = trashList.last;
 
         markerList.add(
-            getDefauldMarker(trashList.last, context, trashList, markerList));
+            // getDefauldMarker(trashList.last, context, trashList, markerList));
+
+            Marker(
+                markerId: MarkerId(trashBuf.id),
+                position:
+                    LatLng(trashBuf.latitude, trashBuf.longitude),
+                icon: BitmapDescriptor.defaultMarkerWithHue(
+                    BitmapDescriptor.hueAzure),
+                // 마커 클릭
+                onTap: () async {
+                  var android = await DeviceInfoPlugin().androidInfo;
+
+                  var newTrash = TrashModel(
+                      trashBuf.id,
+                      trashBuf.latitude,
+                      trashBuf.longitude,
+                      trashBuf.posDescription,
+                      trashBuf.deviceId,
+                      image: await getTrashImage(trashBuf));
+
+                  showDialog(
+                      // context: Scaffold.of(context).context,
+                      context: context,
+                      builder: (context) {
+                        return MakerClickDialog(
+                            newTrash, android.id, trashList, markerList);
+                      }).then((value){
+                        setState(() {
+                          markerList.add(new Marker(markerId: MarkerId("-100")));
+                          markerList.removeLast();
+                        });
+                  });
+                }));
       }
     });
 

@@ -132,11 +132,11 @@ class _MakerClickDialog extends State {
                       break;
                     }
                   }
-
-                  MapPageState? mapState = context.findAncestorStateOfType<MapPageState>();
-                  mapState!.setState(() {
+                  setState(() {
                     trashList.removeAt(i);
                   });
+
+                  deleteTrash(trash);
 
                   Navigator.pop(context);
                 },
@@ -168,10 +168,24 @@ class _MakerClickDialog extends State {
     Image img = Image.memory(bytes2);
     return img;
   }
+
+  // Delete 메소드
+  Future<int> deleteTrash(TrashModel trash) async {
+    final String serverIP =
+        'http://220.69.208.121:8000/trash/${trash.id}'; // 서버 ip 주소
+    print(serverIP);
+    print("아이피");
+    // final String serverIP = 'http://127.0.0.1:8000/trash/${trash.id}'; // 서버 ip 주소
+    var dio = Dio();
+    await dio.delete(serverIP);
+
+    return 0;
+  }
 }
 
 // 휴지통 추가 안내 다이얼로그
 class AddTrashDialog extends StatelessWidget {
+
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
