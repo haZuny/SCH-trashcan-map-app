@@ -61,9 +61,12 @@ class _MakerClickDialog extends State {
   _MakerClickDialog(TrashModel trash, String deviceId,
       List<TrashModel> trashList, List<Marker> markerList) {
     this.trash = trash;
-    this.deviceId = deviceId;
+    setDeviceId();
     this.trashList = trashList;
     this.markerList = markerList;
+    print("바보야");
+    print(deviceId);
+    print(this.deviceId);
   }
 
   @override
@@ -177,9 +180,16 @@ class _MakerClickDialog extends State {
     print("아이피");
     // final String serverIP = 'http://127.0.0.1:8000/trash/${trash.id}'; // 서버 ip 주소
     var dio = Dio();
-    await dio.delete(serverIP);
+    await dio.head(serverIP);
 
     return 0;
+  }
+
+  // 디바이스 아이디 설정
+  Future<String> setDeviceId() async {
+    var android = await DeviceInfoPlugin().androidInfo;
+    this.deviceId = android.id;
+    return android.id;
   }
 }
 
