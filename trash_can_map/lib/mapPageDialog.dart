@@ -61,12 +61,14 @@ class _MakerClickDialog extends State {
   _MakerClickDialog(TrashModel trash, String deviceId,
       List<TrashModel> trashList, List<Marker> markerList) {
     this.trash = trash;
-    setDeviceId();
+    // setDeviceId();
+    this.deviceId = deviceId;
     this.trashList = trashList;
     this.markerList = markerList;
     print("바보야");
     print(deviceId);
     print(this.deviceId);
+    print(trash.deviceId);
   }
 
   @override
@@ -188,8 +190,8 @@ class _MakerClickDialog extends State {
   // 디바이스 아이디 설정
   Future<String> setDeviceId() async {
     var android = await DeviceInfoPlugin().androidInfo;
-    this.deviceId = android.id;
-    return android.id;
+    this.deviceId = android.device;
+    return android.device;
   }
 }
 
@@ -375,7 +377,7 @@ class _GetInputAddTrashDialog extends State<GetInputAddTrashDialog> {
 
   Future<String> setDeviceId() async {
     var android = await DeviceInfoPlugin().androidInfo;
-    this.deviceId = android.id;
-    return android.id;
+    this.deviceId = android.device;
+    return android.device;
   }
 }

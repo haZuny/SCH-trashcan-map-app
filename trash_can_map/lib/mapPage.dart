@@ -207,7 +207,7 @@ class MapPageState extends State<MapPage> {
                         context: context,
                         builder: (BuildContext context) => MakerClickDialog(
                             trashList[minIdx],
-                            android.id,
+                            android.device,
                             trashList,
                             markerList));
                   },
@@ -314,7 +314,7 @@ class MapPageState extends State<MapPage> {
                                                   context: context,
                                                   builder: (context) {
                                                     return MakerClickDialog(
-                                                        newTrash, android.id, trashList, markerList);
+                                                        newTrash, android.device, trashList, markerList);
                                                   }).then((value){
                                                 setState(() {
                                                   markerList.add(new Marker(markerId: MarkerId("-100")));
@@ -396,7 +396,7 @@ class MapPageState extends State<MapPage> {
                       context: context,
                       builder: (context) {
                         return MakerClickDialog(
-                            newTrash, android.id, trashList, markerList);
+                            newTrash, android.device, trashList, markerList);
                       }).then((value){
                         setState(() {
                           markerList.add(new Marker(markerId: MarkerId("-100")));
@@ -434,26 +434,26 @@ Future<dynamic> getTrashImage(TrashModel trash) async {
   return img;
 }
 
-Marker getDefauldMarker(TrashModel trash, BuildContext context,
-    List<TrashModel> trashList, List<Marker> markerList) {
-  return Marker(
-      markerId: MarkerId(trash.id),
-      position: LatLng(trash.latitude, trash.longitude),
-      icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
-      // 마커 클릭
-      onTap: () async {
-        var android = await DeviceInfoPlugin().androidInfo;
-
-        var newTrash = TrashModel(trash.id, trash.latitude, trash.longitude,
-            trash.posDescription, trash.deviceId,
-            image: await getTrashImage(trash));
-
-        showDialog(
-            // context: Scaffold.of(context).context,
-            context: context,
-            builder: (context) {
-              return MakerClickDialog(
-                  newTrash, android.id, trashList, markerList);
-            });
-      });
-}
+// Marker getDefauldMarker(TrashModel trash, BuildContext context,
+//     List<TrashModel> trashList, List<Marker> markerList) {
+//   return Marker(
+//       markerId: MarkerId(trash.id),
+//       position: LatLng(trash.latitude, trash.longitude),
+//       icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
+//       // 마커 클릭
+//       onTap: () async {
+//         var android = await DeviceInfoPlugin().androidInfo;
+//
+//         var newTrash = TrashModel(trash.id, trash.latitude, trash.longitude,
+//             trash.posDescription, trash.deviceId,
+//             image: await getTrashImage(trash));
+//
+//         showDialog(
+//             // context: Scaffold.of(context).context,
+//             context: context,
+//             builder: (context) {
+//               return MakerClickDialog(
+//                   newTrash, android.device, trashList, markerList);
+//             });
+//       });
+// }
