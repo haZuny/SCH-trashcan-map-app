@@ -19,6 +19,8 @@ from django.http import FileResponse
 import chardet
 import base64
 
+from .deeplearning.Resnet_extract_resnet import *
+
 # Create your views here.
 # class TrashViewSet(viewsets.ModelViewSet):
 #     queryset = Trash.objects.all()
@@ -35,6 +37,8 @@ class TrashList(APIView):
         return Response(serializer.errors)
 
     def get(self, request):
+        print(model())
+
         quryset = Trash.objects.all()
         serizer = TrashSerializer(quryset, many=True)
 

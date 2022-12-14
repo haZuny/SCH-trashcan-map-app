@@ -27,8 +27,11 @@ def extract_resnet(X):
     return features_array
 
 def model():
-    new_val_path2 = "images/test5"
+    os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+    new_val_path2 = "images/"
     new_val_path = [join(new_val_path2, filename) for filename in os.listdir(new_val_path2)]
+
+    
     new_val = read_and_prep_images(new_val_path)
 
     new_val = extract_resnet(new_val)
@@ -46,6 +49,6 @@ def model():
     with open("if_clf.h5", "rb") as fr:
         if_clf = pickle.load(fr)
     if_preds2 = if_clf.predict(new_val_re)
-    return if_preds2[0]
 
-model()
+    print(if_preds2[0])
+    return if_preds2[0]
