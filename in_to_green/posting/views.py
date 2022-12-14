@@ -71,17 +71,20 @@ class PostingDetail(APIView):
             sendData.append(obj)
 
             return Response(sendData)
-
-        elif request.method == "HEAD":
-            posting.delete()
-            return Response()
-
-        elif request.method == "OPTIONS":
-            print("asdf")
-            print(request.data)
-            updatePosting = PostingSerializer(posting, data=request.data)
-            if updatePosting.is_valid():
-                updatePosting.save()
-                return Response(updatePosting.data)
-            return Response(serializer.errors)
     
+    def delete(self, request, pk):
+        posting = self.get_object(pk)
+        seriizer = PostingSerializer(posting)
+
+        posting.delete()
+        return Response()
+
+    def put(self, request, pk):
+        posting = self.get_object(pk)
+        seriizer = PostingSerializer(posting)
+
+        updatePosting = PostingSerializer(posting, data=request.data)
+        if updatePosting.is_valid():
+            updatePosting.save()
+            return Response(updatePosting.data)
+        return Response(serializer.errors)

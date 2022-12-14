@@ -182,7 +182,7 @@ class _MakerClickDialog extends State {
     print("아이피");
     // final String serverIP = 'http://127.0.0.1:8000/trash/${trash.id}'; // 서버 ip 주소
     var dio = Dio();
-    await dio.head(serverIP);
+    await dio.delete(serverIP);
 
     return 0;
   }
@@ -337,15 +337,22 @@ class _GetInputAddTrashDialog extends State<GetInputAddTrashDialog> {
             } else {
               // 정보 전송
               sendTrashModel().then((value) {
-                // 모델 생성
-                TrashModel model = TrashModel(value.toString(), pos.latitude,
-                    pos.longitude, textController.text, deviceId);
 
-                // 리스트에 추가
-                setState(() {
-                  trashList.add(model);
-                  print(model.id);
-                });
+                print(value);
+                print("도라에몽");
+                // 쓰레기통이 아니면 추가
+                if(value != ""){
+                  // 모델 생성
+                  TrashModel model = TrashModel(value.toString(), pos.latitude,
+                      pos.longitude, textController.text, deviceId);
+
+                  // 리스트에 추가
+                  setState(() {
+                    trashList.add(model);
+                    print(model.id);
+                  });
+                }
+
                 Navigator.pop(context);
               });
             }
@@ -358,7 +365,7 @@ class _GetInputAddTrashDialog extends State<GetInputAddTrashDialog> {
   }
 
   // post 메소드
-  Future<int> sendTrashModel() async {
+  Future sendTrashModel() async {
     FormData formData = FormData.fromMap({
       'id': '',
       'latitude': '${pos.latitude}',
@@ -372,7 +379,7 @@ class _GetInputAddTrashDialog extends State<GetInputAddTrashDialog> {
     var dio = new Dio();
     var response = await dio.post(serverIP, data: formData);
 
-    return response.data['id'];
+    return response;
   }
 
   Future<String> setDeviceId() async {

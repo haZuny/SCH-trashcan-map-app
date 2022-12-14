@@ -38,7 +38,7 @@ class TrashList(APIView):
             
             # 쓰레기통
             if model('.'+serializer.data['image']) == 1:
-                return Response(serializer.data)
+                return Response(serializer.data['id'])
             else:
                 print("쓰레기아님")
                 Trash.objects.get(pk=serializer.data['id']).delete()
@@ -60,8 +60,6 @@ class TrashList(APIView):
                     # f = open('.'+obj['image'], 'rb')
                     # newObj[key] = ''+ str(f.read())
                     newObj[key] = value
-                else:
-                    print(value)
             sendData.append(newObj)
     
         return Response(sendData)
