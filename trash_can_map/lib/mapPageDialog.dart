@@ -327,30 +327,20 @@ class _GetInputAddTrashDialog extends State<GetInputAddTrashDialog> {
           onPressed: () async {
             // 입력 잘 했나 확인
             if (textController.text == "") {
-              print("종료1");
               Navigator.pop(context);
               return;
             } else if (!isImagePick) {
-              print('종료2');
               Navigator.pop(context);
               return;
             } else {
               // 정보 전송
-              sendTrashModel().then((value) {
+              await sendTrashModel().then((value) {
 
-                print(value);
-                print("도라에몽");
                 // 쓰레기통이 아니면 추가
                 if(value != ""){
                   // 모델 생성
                   TrashModel model = TrashModel(value.toString(), pos.latitude,
                       pos.longitude, textController.text, deviceId);
-
-                  // 리스트에 추가
-                  setState(() {
-                    trashList.add(model);
-                    print(model.id);
-                  });
                 }
 
                 Navigator.pop(context);

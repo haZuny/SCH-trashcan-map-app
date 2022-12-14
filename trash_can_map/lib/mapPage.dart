@@ -202,14 +202,29 @@ class MapPageState extends State<MapPage> {
                         zoom: 18,
                       ),
                     ));
+
+                    // 모델 만들기
+                    TrashModel newTrash = TrashModel(
+                        trashList[minIdx].id,
+                        trashList[minIdx].latitude,
+                        trashList[minIdx].longitude,
+                        trashList[minIdx].posDescription,
+                        trashList[minIdx].deviceId,
+                        image: await getTrashImage(trashList[minIdx]));
+
                     // 팝업 띄우기
                     showDialog(
                         context: context,
-                        builder: (BuildContext context) => MakerClickDialog(
-                            trashList[minIdx],
+                        builder: (BuildContext context) { return MakerClickDialog(
+                            newTrash,
                             android.device,
                             trashList,
-                            markerList));
+                            markerList);}).then((value){
+                              setState(() {
+                                markerList.add(Marker(markerId: MarkerId('-1000')));
+                                markerList.removeLast();
+                              });
+                    });
                   },
                 ),
 
@@ -293,13 +308,16 @@ class MapPageState extends State<MapPage> {
                                         // markerList)
                                         Marker(
                                             markerId: MarkerId(trashBuf.id),
-                                            position:
-                                            LatLng(trashBuf.latitude, trashBuf.longitude),
-                                            icon: BitmapDescriptor.defaultMarkerWithHue(
-                                                BitmapDescriptor.hueAzure),
+                                            position: LatLng(trashBuf.latitude,
+                                                trashBuf.longitude),
+                                            icon: BitmapDescriptor
+                                                .defaultMarkerWithHue(
+                                                    BitmapDescriptor.hueAzure),
                                             // 마커 클릭
                                             onTap: () async {
-                                              var android = await DeviceInfoPlugin().androidInfo;
+                                              var android =
+                                                  await DeviceInfoPlugin()
+                                                      .androidInfo;
 
                                               var newTrash = TrashModel(
                                                   trashBuf.id,
@@ -307,23 +325,27 @@ class MapPageState extends State<MapPage> {
                                                   trashBuf.longitude,
                                                   trashBuf.posDescription,
                                                   trashBuf.deviceId,
-                                                  image: await getTrashImage(trashBuf));
+                                                  image: await getTrashImage(
+                                                      trashBuf));
 
                                               showDialog(
-                                                // context: Scaffold.of(context).context,
+                                                  // context: Scaffold.of(context).context,
                                                   context: context,
                                                   builder: (context) {
                                                     return MakerClickDialog(
-                                                        newTrash, android.device, trashList, markerList);
-                                                  }).then((value){
+                                                        newTrash,
+                                                        android.device,
+                                                        trashList,
+                                                        markerList);
+                                                  }).then((value) {
                                                 setState(() {
-                                                  markerList.add(new Marker(markerId: MarkerId("-100")));
+                                                  markerList.add(new Marker(
+                                                      markerId:
+                                                          MarkerId("-100")));
                                                   markerList.removeLast();
                                                 });
                                               });
-                                            })
-
-                                    );
+                                            }));
                                   });
                                 } else {
                                   showDialog(
@@ -375,8 +397,7 @@ class MapPageState extends State<MapPage> {
 
             Marker(
                 markerId: MarkerId(trashBuf.id),
-                position:
-                    LatLng(trashBuf.latitude, trashBuf.longitude),
+                position: LatLng(trashBuf.latitude, trashBuf.longitude),
                 icon: BitmapDescriptor.defaultMarkerWithHue(
                     BitmapDescriptor.hueAzure),
                 // 마커 클릭
@@ -397,11 +418,11 @@ class MapPageState extends State<MapPage> {
                       builder: (context) {
                         return MakerClickDialog(
                             newTrash, android.device, trashList, markerList);
-                      }).then((value){
-                        setState(() {
-                          markerList.add(new Marker(markerId: MarkerId("-100")));
-                          markerList.removeLast();
-                        });
+                      }).then((value) {
+                    setState(() {
+                      markerList.add(new Marker(markerId: MarkerId("-100")));
+                      markerList.removeLast();
+                    });
                   });
                 }));
       }

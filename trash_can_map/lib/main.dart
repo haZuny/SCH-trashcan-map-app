@@ -17,15 +17,12 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primaryColor: Color(0xffC9D3F0),
       ),
-      home: const MainPage(title: 'Trash Can Map'),
+      home: MainPage(),
     );
   }
 }
 
 class MainPage extends StatefulWidget {
-  const MainPage({super.key, required this.title});
-
-  final String title;
 
   @override
   State<MainPage> createState() => _MainPage();
