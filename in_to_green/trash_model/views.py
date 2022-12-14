@@ -48,7 +48,8 @@ class TrashList(APIView):
                     # f = open('.'+obj['image'], 'rb')
                     # newObj[key] = ''+ str(f.read())
                     newObj[key] = value
-                # else:
+                else:
+                    print(value)
             sendData.append(newObj)
     
         return Response(sendData)
@@ -87,5 +88,9 @@ class TrashDetail(APIView):
             trash.delete()
             return Response()
 
+    def delete(self, requst, pk):
+        trash = self.get_object(pk)
+        seriizer = TrashSerializer(trash)
 
-
+        trash.delete()
+        return Response()

@@ -16,10 +16,12 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from trash_model.views import TrashList
+from posting.views import PostingList
 # from trash_model.views import TrashViewSet
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     # path('models/', include('trash_model.urls')),
-    path('trash/', include('trash_model.urls'))
+    path('trash/', include('trash_model.urls')),
+    path('posting/', include('posting.urls'))
 ]

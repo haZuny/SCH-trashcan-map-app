@@ -39,7 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'trash_model.apps.TrashModelConfig'
+    'trash_model.apps.TrashModelConfig',
+    'posting.apps.PostingConfig'
 ]
 
 MIDDLEWARE = [
