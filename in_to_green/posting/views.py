@@ -85,5 +85,3 @@ class PostingDetail(APIView):
                 return Response(updatePosting.data)
             return Response(serializer.errors)
     
-    def delete(self, request, pk):
-        

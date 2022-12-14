@@ -33,12 +33,20 @@ class TrashList(APIView):
         serializer = TrashSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data)
+
+            print('딥러닝')
+            
+            # 쓰레기통
+            if model('.'+serializer.data['image']) == 1:
+                return Response(serializer.data)
+            else:
+                print("쓰레기아님")
+                Trash.objects.get(pk=serializer.data['id']).delete()
+                return Response()
+
         return Response(serializer.errors)
 
     def get(self, request):
-        print(model())
-
         quryset = Trash.objects.all()
         serizer = TrashSerializer(quryset, many=True)
 

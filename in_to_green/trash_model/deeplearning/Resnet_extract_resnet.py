@@ -26,11 +26,11 @@ def extract_resnet(X):
     features_array = Densenet_model.predict(X)
     return features_array
 
-def model():
+def model(path):
     os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
-    new_val_path2 = "images/"
-    new_val_path = [join(new_val_path2, filename) for filename in os.listdir(new_val_path2)]
-
+    # new_val_path2 = "./trash_model/deeplearning/images"
+    # new_val_path = [join(new_val_path2, filename) for filename in os.listdir(new_val_path2)]
+    new_val_path = [path]
     
     new_val = read_and_prep_images(new_val_path)
 
@@ -38,17 +38,16 @@ def model():
 
     new_val_re = np.reshape(new_val, (1, -1))
 
-    with open("ss.h5", "rb") as fr:
+    with open("./trash_model/deeplearning/ss.h5", "rb") as fr:
         ss = pickle.load(fr)
     new_val_re = ss.transform(new_val_re)
 
-    with open("pca.h5", "rb") as fr:
+    with open("./trash_model/deeplearning/pca.h5", "rb") as fr:
         pca = pickle.load(fr)
     new_val_re = pca.transform(new_val_re)
 
-    with open("if_clf.h5", "rb") as fr:
+    with open("./trash_model/deeplearning/if_clf.h5", "rb") as fr:
         if_clf = pickle.load(fr)
     if_preds2 = if_clf.predict(new_val_re)
 
-    print(if_preds2[0])
     return if_preds2[0]
