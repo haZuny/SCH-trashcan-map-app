@@ -1,3 +1,8 @@
+# 2022 순천향대학교 공과대학 학술제 은상 수상
+![KakaoTalk_20230303_003331285](https://user-images.githubusercontent.com/64102831/222474693-f9c8e186-c3b0-48e8-b32d-b9efaf050d7a.jpg)
+
+
+# 발표자료
 ![슬라이드4](https://user-images.githubusercontent.com/64102831/222473887-3ff52bb9-1efc-4ff4-8106-b3803ef7adc5.PNG)
 ![슬라이드5](https://user-images.githubusercontent.com/64102831/222473900-c2148416-9ce5-473a-9789-8345cf3b831f.PNG)
 ![슬라이드6](https://user-images.githubusercontent.com/64102831/222473905-136affd3-3c60-4b63-a263-2daa12ee3cdf.PNG)
